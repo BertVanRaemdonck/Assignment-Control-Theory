@@ -1,0 +1,12 @@
+Een nieuwe git repo maken:
+1. Browse naar de map waar de repo moet komen
+2. 	git init
+
+Remote zetten
+1. 	git remote add origin #URL#
+2.	git remote add upstream #URL#
+3.	git remote -v	(om te controleren)
+
+Bestanden binnenhalen van remote
+1. 	git fetch upstream
+2.	git merge upstream/master
