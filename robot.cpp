@@ -56,16 +56,7 @@ void Robot::controllerHook(){
 	if(controlEnabled()){
 		//write the control in here
 
-    int v_motor1 = System.getGPinInt(0);    //linkse motor als wagentje rechtop is   EN deze functie verwijst naar IntOut0
-    int v_motor2 = System.getGPinInt(1);    //rechtse motor als wagentje rechtop is  EN deze functie verwijst naar IntOut1
-
-    _motor1 -> setBridgeVoltage(v_motor1); // set motor1 voltage to variable v_motor
-    _motor2 -> setBridgeVoltage(v_motor2); // set motor2 voltage to -3V
-
-
-    int enc1_value = _encoder1 -> readRawValue ();
-    System.setGPoutInt(1 ,enc1_value); // write value enc1_value to integer channel 1  ("IntIn1")    --> positie bepaling van motor 1, grote integers voor grote resolutie
-    //System.setGPoutFloat(7 ,5.1); // write value 5.1 to floating point channel 7   ("FloatIn7")
+    random_excitation();
 
     
 //     float set_point1 = System.getGPinFloat(1);
@@ -90,6 +81,31 @@ void Robot::controllerHook(){
     _motor1 -> setBridgeVoltage(0); // set motor1 voltage to 0 mV , i.e. 0V
     _motor2 -> setBridgeVoltage(0); // set motor2 voltage to 0V
 	}
+}
+
+void Robot::random_excitation()
+{
+  float V_rand = ((rand()%2)-0.5)*2*(rand() % 12000 - 6000);
+  System.setGPoutInt(1 , V_rand);
+  _motor1 -> setBridgeVoltage(V_rand);
+
+  int enc1_value = _encoder1 -> readRawValue ();
+  System.setGPoutInt(0, enc1_value);
+}
+
+
+void Robot::test()
+{
+  int v_motor1 = System.getGPinInt(0);    //linkse motor als wagentje rechtop is   EN deze functie verwijst naar IntOut0
+    int v_motor2 = System.getGPinInt(1);    //rechtse motor als wagentje rechtop is  EN deze functie verwijst naar IntOut1
+
+    _motor1 -> setBridgeVoltage(v_motor1); // set motor1 voltage to variable v_motor
+    _motor2 -> setBridgeVoltage(v_motor2); // set motor2 voltage to -3V
+
+
+    int enc1_value = _encoder1 -> readRawValue ();
+    System.setGPoutInt(1 ,enc1_value); // write value enc1_value to integer channel 1  ("IntIn1")    --> positie bepaling van motor 1, grote integers voor grote resolutie
+    //System.setGPoutFloat(7 ,5.1); // write value 5.1 to floating point channel 7   ("FloatIn7")
 }
 
 void Robot::resetEncoders()

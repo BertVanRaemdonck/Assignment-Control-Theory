@@ -37,14 +37,6 @@ private:
 	bool toggleButton(uint8_t button);
 	bool controlEnabled();
 
-  // Data for tutorial session controller
-//  float Kp = 130000;
-//  float Ki = 600000;
-//  float Kd = 2000;
-//  float Ts = 0.01;    // in ms
-//
-//  float prev_0 = 0;
-//  bool even = true;
 
 public:
     Robot(uint8_t ID = 0);
@@ -55,6 +47,10 @@ public:
 	void controllerHook();	//update function which can be executed continuously
 	void resetEncoders();	//reset the encoders
 	void resetPendulum();	//reset pendulum zero position
+
+  // custom functions
+  void test();
+  void random_excitation();
 
 	///////
 	/// GET
