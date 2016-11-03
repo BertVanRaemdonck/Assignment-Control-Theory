@@ -42,8 +42,12 @@ classdef QRecord
             self.version = char(DOM.getElementsByTagName('version').item(0).getFirstChild.getData);
            
             % Get the comments
-            self.comment = char(DOM.getElementsByTagName('comment').item(0).getFirstChild.getData);
-            
+            try
+                self.comment = char(DOM.getElementsByTagName('comment').item(0).getFirstChild.getData);
+            catch e
+                self.comment = ''
+            end
+                
             % Get the labels
             item_labels = DOM.getElementsByTagName('labels').item(0);
             element_values = item_labels.getElementsByTagName('value');
