@@ -56,34 +56,34 @@ void Robot::controllerHook(){
 	if(controlEnabled()){
 		//write the control in here
 
-//    int v_motor1 = System.getGPinInt(0);    //linkse motor als wagentje rechtop is   EN deze functie verwijst naar IntOut0
-//    int v_motor2 = System.getGPinInt(1);    //rechtse motor als wagentje rechtop is  EN deze functie verwijst naar IntOut1
-//
-//    _motor1 -> setBridgeVoltage(v_motor1); // set motor1 voltage to variable v_motor
-//    _motor2 -> setBridgeVoltage(v_motor2); // set motor2 voltage to -3V
-//
-//
-//    int enc1_value = _encoder1 -> readRawValue ();
-//    System.setGPoutInt(1 ,enc1_value); // write value enc1_value to integer channel 1  ("IntIn1")    --> positie bepaling van motor 1, grote integers voor grote resolutie
-//    //System.setGPoutFloat(7 ,5.1); // write value 5.1 to floating point channel 7   ("FloatIn7")
+    int v_motor1 = System.getGPinInt(0);    //linkse motor als wagentje rechtop is   EN deze functie verwijst naar IntOut0
+    int v_motor2 = System.getGPinInt(1);    //rechtse motor als wagentje rechtop is  EN deze functie verwijst naar IntOut1
+
+    _motor1 -> setBridgeVoltage(v_motor1); // set motor1 voltage to variable v_motor
+    _motor2 -> setBridgeVoltage(v_motor2); // set motor2 voltage to -3V
+
+
+    int enc1_value = _encoder1 -> readRawValue ();
+    System.setGPoutInt(1 ,enc1_value); // write value enc1_value to integer channel 1  ("IntIn1")    --> positie bepaling van motor 1, grote integers voor grote resolutie
+    //System.setGPoutFloat(7 ,5.1); // write value 5.1 to floating point channel 7   ("FloatIn7")
 
     
-     float set_point1 = System.getGPinFloat(1);
-     float cur_pos1 = _encoder1 -> readRawValue();
-
-     float e_k = set_point1 - cur_pos1;
-
-     float u_k = (1/(Kp + Ki*Ts/2 + Kd*2/Ts)) * (e_k - e_kmin2 - u_kmin1*(Ki*Ts - 4/Ts) - u_kmin2*(-Kp + Ki*Ts/2 + Kd*2/Ts));
-
-     e_kmin2 = e_kmin1;
-     e_kmin1 = e_k;
-
-     u_kmin2 = u_kmin1;
-     u_kmin1 = u_k;
-    
-    _motor1 -> setBridgeVoltage(u_k); // set motor1 voltage to variable u_k
-    System.setGPoutFloat(7 ,e_k); // write value 5.1 to floating point channel 7   ("FloatIn7")
-    System.setGPoutFloat(6 ,u_k); // write value 5.1 to floating point channel 7   ("FloatIn7")
+//     float set_point1 = System.getGPinFloat(1);
+//     float cur_pos1 = _encoder1 -> readRawValue();
+//
+//     float e_k = set_point1 - cur_pos1;
+//
+//     float u_k = (1/(Kp + Ki*Ts/2 + Kd*2/Ts)) * (e_k - e_kmin2 - u_kmin1*(Ki*Ts - 4/Ts) - u_kmin2*(-Kp + Ki*Ts/2 + Kd*2/Ts));
+//
+//     e_kmin2 = e_kmin1;
+//     e_kmin1 = e_k;
+//
+//     u_kmin2 = u_kmin1;
+//     u_kmin1 = u_k;
+//    
+//    _motor1 -> setBridgeVoltage(u_k); // set motor1 voltage to variable u_k
+//    System.setGPoutFloat(7 ,e_k); // write value 5.1 to floating point channel 7   ("FloatIn7")
+//    System.setGPoutFloat(6 ,u_k); // write value 5.1 to floating point channel 7   ("FloatIn7")
     
 	} else {
 		//set motor voltage to zero or it will keep on running...
