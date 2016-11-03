@@ -51,6 +51,8 @@ public:
   // custom functions
   void test();
   void random_excitation();
+  void ramp_input();
+  void step_input();
 
 	///////
 	/// GET

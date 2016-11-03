@@ -45,6 +45,7 @@ Robot::Robot(uint8_t ID):
   float u_kmin1 = 0;
   float u_kmin2 = 0;
 
+  float V_ramp = 0;
 void Robot::init(){
 	//initialize the robot - sort of starting procedure
 	resetEncoders();
@@ -56,6 +57,7 @@ void Robot::controllerHook(){
 	if(controlEnabled()){
 		//write the control in here
 
+    //random_excitation();
     random_excitation();
 
     
@@ -86,11 +88,57 @@ void Robot::controllerHook(){
 void Robot::random_excitation()
 {
   float V_rand = ((rand()%2)-0.5)*2*(rand() % 12000 - 6000);
-  System.setGPoutInt(1 , V_rand);
+  System.setGPoutInt(2 , V_rand);
   _motor1 -> setBridgeVoltage(V_rand);
+  _motor2 -> setBridgeVoltage(V_rand);
 
   int enc1_value = _encoder1 -> readRawValue ();
   System.setGPoutInt(0, enc1_value);
+  int enc2_value = _encoder2 -> readRawValue ();
+  System.setGPoutInt(1, enc2_value);
+}
+
+void Robot::ramp_input()
+{
+
+  if (V_ramp > -6000)
+  {
+    V_ramp = V_ramp - 1;
+    float V_motor = min(-3000, V_ramp);
+
+    System.setGPoutInt(2 , V_motor);
+    _motor1 -> setBridgeVoltage(V_motor);
+    _motor2 -> setBridgeVoltage(V_motor);
+  }
+  
+
+  int enc1_value = _encoder1 -> readRawValue ();
+  System.setGPoutInt(0, enc1_value);
+  int enc2_value = _encoder2 -> readRawValue ();
+  System.setGPoutInt(1, enc2_value);
+}
+
+void Robot::step_input()
+{
+  float V_motor = 0;
+  if (V_ramp > 1000)
+  {
+    V_motor = -6000;
+  }
+  else 
+  { 
+  V_ramp = V_ramp + 1;
+  }
+
+  System.setGPoutInt(2 , V_motor);
+  _motor1 -> setBridgeVoltage(V_motor);
+  _motor2 -> setBridgeVoltage(V_motor);
+  
+
+  int enc1_value = _encoder1 -> readRawValue ();
+  System.setGPoutInt(0, enc1_value);
+  int enc2_value = _encoder2 -> readRawValue ();
+  System.setGPoutInt(1, enc2_value);
 }
 
 
