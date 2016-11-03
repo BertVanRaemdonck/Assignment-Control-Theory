@@ -1,4 +1,53 @@
+Belangrijke zaken om rekening mee te houden
+_______________________
+
+* Voltage mag max 6000 mV zijn !!!
+* Voltage heeft een threshold van 3000 mV, bij 3000 mV heeft het een klein duwtje nodig
+	--> getest: 2500 mV blijft ook nog draaien als het al ervoor aan het draaien was
+* Encoder bereik is tussen ongeveer -32 000 en 32 000  (2^15 -1 exact)
+* Random functie heeft een bias in een bepaalde richting
+* Gebruik niet "1/2" om "0.5" aan te duiden, aangezien "/" een deling is die geen rekening houdt met de rest bij het delen van de integers
+
+
+
 Gebruik QRoboticsCenter
 _______________________
 
 * Moet af staan bij uploaden Arduino sketch
+* Button 0 drukken om aan en af te zetten
+* CTRL + R start of stopt de recorder
+* P pauzeert de stroom van data op het scherm, niet bij de recording zelf
+
+
+
+
+Declaratie variabelen QRoboticsCenter
+_______________________
+
+* FloatOut0 = voltage linkse motor (als de wagen rechtop is en swivel wheel achteraan)
+* FloatOut1 = voltage rechtse motor (als de wagen rechtop is en swivel wheel achteraan)
+
+	--> omega vector naar de binnenkant van de wagen == positieve voltage
+	--> assistent zei om voltage best als float in te stellen, hij rondt wel zelf af
+
+* FloatIn0 = encoder linkse motor
+* FloatIn1 = encoder rechtse motor
+
+
+
+
+
+Arduino Code
+_______________________
+	Frequentie Robot::controlerHook()
+	--------------------	
+	* werkt aan een frequentie van 100 Hz
+
+
+	Robot sub-functie definiëren
+	--------------------
+	* In Robot.cpp :
+		void Robot::functie_naam(argumenten)
+	* In Robot.h :
+		in public functie zetten:
+		void functie_naam(argumenten);
