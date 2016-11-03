@@ -7,6 +7,7 @@ _______________________
 * Encoder bereik is tussen ongeveer -32 000 en 32 000  (2^15 -1 exact)
 * Random functie heeft een bias in een bepaalde richting
 * Gebruik niet "1/2" om "0.5" aan te duiden, aangezien "/" een deling is die geen rekening houdt met de rest bij het delen van de integers
+* Bij elke log moet er nog handmatig een comment aan de .xml file toegevoegd worden
 
 
 
