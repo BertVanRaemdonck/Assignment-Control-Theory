@@ -53,6 +53,7 @@ public:
   void random_excitation();
   void ramp_input();
   void step_input();
+  void block_input();
 
 	///////
 	/// GET

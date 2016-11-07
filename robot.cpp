@@ -46,6 +46,8 @@ Robot::Robot(uint8_t ID):
   float u_kmin2 = 0;
 
   float V_ramp = 0;
+  int counter = 0;
+  
 void Robot::init(){
 	//initialize the robot - sort of starting procedure
 	resetEncoders();
@@ -140,6 +142,42 @@ void Robot::step_input()
   int enc2_value = _encoder2 -> readRawValue ();
   System.setGPoutInt(1, enc2_value);
 }
+
+
+void Robot::block_input()
+{
+  float breedte_blokpuls = 500;
+  if (counter < breedte_blokpuls)
+  {
+    float V_motor = 3500;
+
+    System.setGPoutInt(2 , V_motor);
+    _motor1 -> setBridgeVoltage(V_motor);
+    _motor2 -> setBridgeVoltage(V_motor);
+  }
+
+  if (counter >= breedte_blokpuls)
+  {
+    float V_motor = 6000;
+    System.setGPoutInt(2 , V_motor);
+    _motor1 -> setBridgeVoltage(V_motor);
+    _motor2 -> setBridgeVoltage(V_motor);
+  }
+ 
+
+  counter = counter + 1;
+
+  if (counter >= 2*breedte_blokpuls)
+  {
+    counter = 0;
+  }
+
+  int enc1_value = _encoder1 -> readRawValue ();
+  System.setGPoutInt(0, enc1_value);
+  int enc2_value = _encoder2 -> readRawValue ();
+  System.setGPoutInt(1, enc2_value);
+}
+
 
 
 void Robot::test()
