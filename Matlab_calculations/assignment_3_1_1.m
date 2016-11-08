@@ -8,7 +8,7 @@ fs = 100;   % Hz
 Ts = 1/fs;  % s
 
 %% Viewing data
-rec_random1 = readlog('log_gpio_step1.xml');
+rec_random1 = readlog('log_gpio_ramp1.xml');
 
 t = rec_random1.getData('time');
 v = rec_random1.getData('Voltage');
@@ -32,19 +32,8 @@ enc2 = cust_unwrap(enc2, enc_bits);
 
 %% Calculating speeds
 
-enc1_speed = zeros(size(enc1));
-for i = 1:size(enc1_speed,1)-1
-    enc1_speed(i) = (enc1(i+1)-enc1(i))/(t(i+1)-t(i));    
-end
-enc1_speed(end) = enc1_speed(end-1);
-
-figure()
-subplot(3,1,1)
-plot(t,v)
-subplot(3,1,2)
-plot(t,enc1)
-subplot(3,1,3)
-plot(t,enc1_speed)
+enc1_speed = central_diff(enc1, t);
+enc2_speed = central_diff(enc2, t);
 
 %% Converting to frequency domain
 n = size(t,1);
