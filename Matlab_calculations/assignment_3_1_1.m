@@ -8,7 +8,7 @@ fs = 100;   % Hz
 Ts = 1/fs;  % s
 
 %% Viewing data
-rec_random1 = readlog('log_gpio_random1.xml');
+rec_random1 = readlog('log_gpio_step1.xml');
 
 t = rec_random1.getData('time');
 v = rec_random1.getData('Voltage');
@@ -24,58 +24,27 @@ subplot(3,1,3)
 plot(t, enc2);
 
 
-
 %% Unwrapping the values of the encoder
 
-tol_encoder = 32761;
-random1_enc1_a = enc1;
-for i = length(enc1)-1:-1:1
-    
-    Y = sign(enc1);
-    if Y(i)==1 && Y(i+1)==-1
-        if enc1(i) > 32700
-            random1_enc1_a(i+1:end) = random1_enc1_a(i+1:end) + (2*tol_encoder);
-        end
-    end
-    if Y(i)==-1 && Y(i+1)==1
-        if enc1(i) < -32700
-            random1_enc1_a(i+1:end) = random1_enc1_a(i+1:end) - (2*tol_encoder);
-        end
-    end
+enc_bits = 16;  % amount of bits used by the encoder
+enc1 = cust_unwrap(enc1, enc_bits);
+enc2 = cust_unwrap(enc2, enc_bits);
+
+%% Calculating speeds
+
+enc1_speed = zeros(size(enc1));
+for i = 1:size(enc1_speed,1)-1
+    enc1_speed(i) = (enc1(i+1)-enc1(i))/(t(i+1)-t(i));    
 end
+enc1_speed(end) = enc1_speed(end-1);
 
 figure()
 subplot(3,1,1)
-plot(t, random1_enc1_a);
+plot(t,v)
 subplot(3,1,2)
-plot(t, enc1);
+plot(t,enc1)
 subplot(3,1,3)
-plot(t, random1_enc1_a-enc1);
-
-
-random1_enc2_a = enc2;
-for i = length(enc2)-1:-1:1
-    
-    Y = sign(enc2);
-    if Y(i)==1 && Y(i+1)==-1
-        if enc2(i) > 32700
-            random1_enc2_a(i+1:end) = random1_enc2_a(i+1:end) + (2*tol_encoder);
-        end
-    end
-    if Y(i)==-1 && Y(i+1)==1
-        if enc2(i) < -32700
-            random1_enc2_a(i+1:end) = random1_enc2_a(i+1:end) - (2*tol_encoder);
-        end
-    end
-end
-
-figure()
-subplot(3,1,1)
-plot(t, random1_enc2_a);
-subplot(3,1,2)
-plot(t, enc2);
-subplot(3,1,3)
-plot(t, random1_enc2_a-enc2);
+plot(t,enc1_speed)
 
 %% Converting to frequency domain
 n = size(t,1);
