@@ -42,13 +42,13 @@ Arduino Code
 _______________________
 	Frequentie Robot::controlerHook()
 	--------------------	
-	* werkt aan een frequentie van 100 Hz
+	* werkt aan een frequentie van 100 Hz (in theorie)
 
 
 	Robot sub-functie definiëren
 	--------------------
 	* In Robot.cpp :
-		void Robot::functie_naam(argumenten)
+		void Robot::functie_naam([type_argument argument,]*)
 	* In Robot.h :
 		in public functie zetten:
-		void functie_naam(argumenten);
+		void functie_naam([type_argument (= default),]*);

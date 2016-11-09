@@ -50,7 +50,7 @@ public:
 
   // custom functions
   void test();
-  void random_excitation();
+  void random_excitation(int = 0);
   void ramp_input();
   void step_input();
   void block_input();

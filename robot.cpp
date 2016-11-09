@@ -55,11 +55,10 @@ void Robot::init(){
 
 void Robot::controllerHook(){
 	//do something that is periodic: reading from sensors, setting the motors, updating variables sent to the pc..
-	
+  
 	if(controlEnabled()){
 		//write the control in here
 
-    //random_excitation();
     random_excitation();
 
     
@@ -87,8 +86,25 @@ void Robot::controllerHook(){
 	}
 }
 
-void Robot::random_excitation()
+void Robot::random_excitation(int period)
 {
+  /**
+   * Writes a periodic random voltage signal to both motors.
+   * If period = 0, the signal has no periodicity
+   */
+  if (period > 0)
+  {
+    if (counter >= period)
+    {
+      srand(1);
+      counter = 0;
+    }
+    else
+    {
+      counter = counter + 1;
+    }
+  }
+   
   float V_rand = ((rand()%2)-0.5)*2*(rand() % 12000 - 6000);
   System.setGPoutInt(2 , V_rand);
   _motor1 -> setBridgeVoltage(V_rand);
