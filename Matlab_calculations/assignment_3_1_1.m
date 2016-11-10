@@ -8,7 +8,8 @@ fs = 100;   % Hz
 Ts = 1/fs;  % s
 
 %% Cleaning and viewing data
-rec_random1 = readlog('log_gpio_random1.xml');
+rec_random1 = readlog('log_gpio_rand_per3_(2000).xml');
+period = 2000;
 
 % raw input data - these are sampled at a non-uniform rate!
 t_input = rec_random1.getData('time');
@@ -27,6 +28,13 @@ v = interp1(t_input,v_input,t);                                 % values of v at
 enc1 = interp1(t_input,enc1_input,t);                           % values of enc1 at the corresponding times
 enc2 = interp1(t_input,enc2_input,t);                           % values of enc2 at the corresponding times
 
+% Apply average filter
+v = average_filter(v,period);
+enc1 = average_filter(enc2,period);
+enc2 = average_filter(enc2,period);
+t = t(1:length(v));
+
+% Plot the data
 figure('name', 'Raw input data')
 subplot(3,1,1)
 plot(t, v);

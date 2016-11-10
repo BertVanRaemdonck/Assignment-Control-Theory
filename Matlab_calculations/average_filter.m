@@ -3,9 +3,9 @@ function filtered = average_filter(data, period)
 % data
 %   filtered = AVERAGE_FILTER(data, period) outputs a sequence of data of
 %   length 'period' with values that correspond to the average value of the
-%   data in different periods.
+%   data in different periods. period = 0 will return the unfiltered data.
 
-if period < length(data)
+if period < length(data) && period > 0
     filtered = zeros(period,1);
 
     for i=1:length(filtered)
