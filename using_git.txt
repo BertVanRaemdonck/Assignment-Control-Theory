@@ -10,6 +10,8 @@ Remote zetten
 Bestanden binnenhalen van remote
 1. 	git fetch upstream
 2.	git merge upstream/master
+* Hard reset van een specifieke file
+3. 	git checkout HEAD -- #bestandsnaam#	(check de volledige naam bij de foutmelding erboven)
 
 Aanpassingen committen
 * wanneer je slechts specifieke files will committen

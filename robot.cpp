@@ -59,7 +59,8 @@ void Robot::controllerHook(){
 	if(controlEnabled()){
 		//write the control in here
 
-    random_excitation();
+    // random_excitation(2000);
+    block_input(2000);
 
     
 //     float set_point1 = System.getGPinFloat(1);
@@ -160,9 +161,9 @@ void Robot::step_input()
 }
 
 
-void Robot::block_input()
+void Robot::block_input(float breedte_blokpuls)
 {
-  float breedte_blokpuls = 500;
+  
   if (counter < breedte_blokpuls)
   {
     float V_motor = 3500;
