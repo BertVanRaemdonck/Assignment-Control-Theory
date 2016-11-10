@@ -13,7 +13,7 @@ if period < length(data) && period > 0
         nb_periods = 0; % the amount of periods currently viewed
         index = i;      % index of the element currently viewed
         
-        while index < length(data)
+        while nb_periods+1 < length(data)/period
             sum = sum + data(index);
             nb_periods = nb_periods + 1;
             index = i + nb_periods*period;            

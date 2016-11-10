@@ -8,8 +8,8 @@ fs = 100;   % Hz
 Ts = 1/fs;  % s
 
 %% Cleaning and viewing data
-rec_random1 = readlog('log_gpio_rand_per3_(2000).xml');
-period = 2000;
+rec_random1 = readlog('log_gpio_rand_(1000).xml');
+period =1000;
 
 % raw input data - these are sampled at a non-uniform rate!
 t_input = rec_random1.getData('time');
@@ -81,9 +81,9 @@ ylabel('speed encoder 2')
 
 n = size(t,1);
 f = fs*(-n/2:n/2-1)/n;
-v_f = fftshift(fft(v))/n;
-enc1_f = fftshift(fft(enc1_speed))/n;
-enc2_f = fftshift(fft(enc2_speed))/n;
+v_f = fftshift(fft(v,n))/n;
+enc1_f = fftshift(fft(enc1_speed,n))/n;
+enc2_f = fftshift(fft(enc2_speed,n))/n;
 
 figure('name', 'Input data in the frequency domain')
 subplot(3,2,1)
@@ -123,4 +123,3 @@ subplot(2,1,2)
 semilogx(f, 180/pi*unwrap(angle(enc1_f./v_f)))
 xlabel('f [Hz]')
 ylabel('\angleH_{v,enc1} [°]')
-        
