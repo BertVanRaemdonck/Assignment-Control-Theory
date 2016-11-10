@@ -7,13 +7,25 @@ clear
 fs = 100;   % Hz
 Ts = 1/fs;  % s
 
-%% Viewing data
+%% Cleaning and viewing data
 rec_random1 = readlog('log_gpio_random1.xml');
 
-t = rec_random1.getData('time');
-v = rec_random1.getData('Voltage');
-enc1 = rec_random1.getData('Encoder1');
-enc2 = rec_random1.getData('Encoder2');
+% raw input data - these are sampled at a non-uniform rate!
+t_input = rec_random1.getData('time');
+v_input = rec_random1.getData('Voltage');
+enc1_input = rec_random1.getData('Encoder1');
+enc2_input = rec_random1.getData('Encoder2');
+
+% Unwrapping the values of the encoder
+enc_bits = 16;  % amount of bits used by the encoder
+enc1_input = cust_unwrap(enc1_input, enc_bits);
+enc2_input = cust_unwrap(enc2_input, enc_bits);
+
+% Interpolate the input data to uniform timesteps 
+t = (t_input(1):Ts*1e3:t_input(1)+(length(t_input)-1)*Ts*1e3)'; % the equivalent of t_input if Ts were truly uniform
+v = interp1(t_input,v_input,t);                                 % values of v at the corresponding times
+enc1 = interp1(t_input,enc1_input,t);                           % values of enc1 at the corresponding times
+enc2 = interp1(t_input,enc2_input,t);                           % values of enc2 at the corresponding times
 
 figure('name', 'Raw input data')
 subplot(3,1,1)
@@ -30,11 +42,7 @@ xlabel('t [ms]')
 ylabel('value encoder 2')
 
 
-%% Unwrapping the values of the encoder
 
-enc_bits = 16;  % amount of bits used by the encoder
-enc1 = cust_unwrap(enc1, enc_bits);
-enc2 = cust_unwrap(enc2, enc_bits);
 
 %% Calculating speeds
 
@@ -57,16 +65,16 @@ ylabel('speed encoder 2')
 
 %% Converting to frequency domain
 
-% Interpolate the speeds to uniform timesteps since fft assumes the data
-% are evenly spaced in time
-t_uniform = (t(1):10:t(1)+(length(t)-1)*10)';           % the equivalent of t if Ts were truly uniform
-enc1_speed_uniform = interp1(t,enc1_speed,t_uniform);   % values of enc1_speed at the corresponding times
-enc2_speed_uniform = interp1(t,enc2_speed,t_uniform);   % values of enc2_speed at the corresponding times
+% % Interpolate the speeds to uniform timesteps since fft assumes the data
+% % are evenly spaced in time
+% t_uniform = (t(1):10:t(1)+(length(t)-1)*10)';           % the equivalent of t if Ts were truly uniform
+% enc1_speed_uniform = interp1(t,enc1_speed,t_uniform);   % values of enc1_speed at the corresponding times
+% enc2_speed_uniform = interp1(t,enc2_speed,t_uniform);   % values of enc2_speed at the corresponding times
 
 n = size(t,1);
 f = fs*(-n/2:n/2-1)/n;
 v_f = fftshift(fft(v))/n;
-enc1_f = fftshift(fft(enc1_speed_uniform))/n;
+enc1_f = fftshift(fft(enc1_speed))/n;
 enc2_f = fftshift(fft(enc2_speed))/n;
 
 figure('name', 'Input data in the frequency domain')
