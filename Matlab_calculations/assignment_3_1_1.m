@@ -153,3 +153,83 @@ ylabel('\angleH_{v,enc2} [°]')
 % semilogx(f, 180/pi*unwrap(angle(enc2_f./v_f)))
 % xlabel('f [Hz]')
 % ylabel('\angleH_{v,enc2} [°]')
+
+
+%% Finding least squares solution
+% encoder 1
+u = v - mean(v);
+enc1_speed_gem = enc1_speed - mean(enc1_speed);
+A = u(3:end);
+B1 = [-u(2:end-1), u(1:end-2), enc1_speed_gem(2:end-1), enc1_speed_gem(1:end-2)];
+phi_1 = B1\A;    %[c, d, a, b]
+
+teller_1 = [0, phi_1(3), phi_1(4)];
+noemer_1 = [1, phi_1(1), phi_1(2)];
+sys_d_1 = tf(teller_1, noemer_1, Ts);
+
+%calculation poles and zeros encoder 1
+[Wn1, zeta1, P1] = damp(sys_d_1);
+omega_n1_cont = Wn1
+poles_1 = P1
+zeros_1 = zero(sys_d_1)
+
+%Bode plot encoder 1
+figure('name','Bodeplot least squares solution encoder 1')
+bode(sys_d_1)
+
+FRF_lin1 = freqz(teller_1, noemer_1, f, fs);
+figure('name','Comparison bode plots encoder 1')
+subplot(2,1,1)
+semilogx(f, 20*log10(abs(enc1_f./v_f)), f, 20*log10(abs(FRF_lin1)), '--', 'LineWidth', 1)
+grid on
+axis tight
+xlabel('f  [Hz]')
+ylabel('|FRF|  [m]')
+legend('emp', 'est')
+subplot(2,1,2)
+semilogx(f, 180/pi*unwrap(angle(enc1_f./v_f)), f, 180/pi*unwrap(angle(FRF_lin1)), '--', 'LineWidth', 1)
+grid on
+axis tight
+xlabel('f  [Hz]')
+ylabel('\phi(FRF)  [^\circ]')
+legend('emp', 'est')
+
+
+% encoder 2
+enc2_speed_gem = enc2_speed - mean(enc2_speed);
+
+B2 = [-u(2:end-1), u(1:end-2), enc2_speed_gem(2:end-1), enc2_speed_gem(1:end-2)];
+phi_2 = B2\A;    %[c, d, a, b]
+
+teller_2 = [0, phi_2(3), phi_2(4)];
+noemer_2 = [1, phi_2(1), phi_2(2)];
+sys_d_2 = tf(teller_2, noemer_2, Ts);
+
+%Calculation poles and zeros encoder 2
+[Wn2, zeta2, P2] = damp(sys_d_2);
+omega_n2_cont = Wn2
+poles_2 = P2
+zeros_2 = zero(sys_d_2)
+
+%Bode plot encoder 2
+figure('name','Bodeplot least squares solution encoder 2')
+bode(sys_d_2)
+
+FRF_lin2 = freqz(teller_2, noemer_2, f, fs);
+figure('name','Comparison bode plots encoder 2')
+subplot(2,1,1)
+semilogx(f, 20*log10(abs(enc2_f./v_f)), f, 20*log10(abs(FRF_lin2)), '--', 'LineWidth', 1)
+grid on
+axis tight
+xlabel('f  [Hz]')
+ylabel('|FRF|  [m]')
+legend('emp', 'est')
+subplot(2,1,2)
+semilogx(f, 180/pi*unwrap(angle(enc2_f./v_f)), f, 180/pi*unwrap(angle(FRF_lin2)), '--', 'LineWidth', 1)
+grid on
+axis tight
+xlabel('f  [Hz]')
+ylabel('\phi(FRF)  [^\circ]')
+legend('emp', 'est')
+
+
