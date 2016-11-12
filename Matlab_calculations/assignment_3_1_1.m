@@ -8,8 +8,17 @@ fs = 100;   % Hz
 Ts = 1/fs;  % s
 
 %% Cleaning and viewing data
-rec_random1 = readlog('log_gpio_rand_(1000).xml');
-period =1000;
+type = 'rand'       % type of the signal: 'block', 'rand', ...
+period = 1000;      % period of the signal, 0 if it isn't periodical
+if period > 0
+    log_name = sprintf('log_gpio_%s_(%d).xml', type, period);
+else
+    log_name = sprintf('log_gpio_%s.xml', type);
+end
+rec_random1 = readlog(log_name);
+
+period = period + 1;
+
 
 % raw input data - these are sampled at a non-uniform rate!
 t_input = rec_random1.getData('time');
@@ -24,7 +33,7 @@ enc2_input = cust_unwrap(enc2_input, enc_bits);
 
 % Interpolate the input data to uniform timesteps 
 t = (t_input(1):Ts*1e3:t_input(1)+(length(t_input)-1)*Ts*1e3)'; % the equivalent of t_input if Ts were truly uniform
-v = interp1(t_input,v_input,t);                                 % values of v at the corresponding times
+v = v_input;                                                    % v doesn't have to be interpolated because the Arduino does a zoh                  
 enc1 = interp1(t_input,enc1_input,t);                           % values of enc1 at the corresponding times
 enc2 = interp1(t_input,enc2_input,t);                           % values of enc2 at the corresponding times
 
@@ -55,7 +64,15 @@ ylabel('value encoder 2')
 %% Calculating speeds
 
 enc1_speed = central_diff(enc1, t);
+enc1_speed = enc1_speed - enc1_speed(1);
 enc2_speed = central_diff(enc2, t);
+enc2_speed = enc2_speed - enc2_speed(1);
+
+% Extra butterworth filter against noise
+[B_filt, A_filt] = butter(6,0.3);
+v = filter(B_filt, A_filt, v);
+enc1_speed = filter(B_filt, A_filt, enc1_speed);
+enc2_speed = filter(B_filt, A_filt, enc2_speed);
 
 figure('name', 'Processed input data')
 subplot(3,1,1)
@@ -72,12 +89,6 @@ xlabel('t [ms]')
 ylabel('speed encoder 2')
 
 %% Converting to frequency domain
-
-% % Interpolate the speeds to uniform timesteps since fft assumes the data
-% % are evenly spaced in time
-% t_uniform = (t(1):10:t(1)+(length(t)-1)*10)';           % the equivalent of t if Ts were truly uniform
-% enc1_speed_uniform = interp1(t,enc1_speed,t_uniform);   % values of enc1_speed at the corresponding times
-% enc2_speed_uniform = interp1(t,enc2_speed,t_uniform);   % values of enc2_speed at the corresponding times
 
 n = size(t,1);
 f = fs*(-n/2:n/2-1)/n;
