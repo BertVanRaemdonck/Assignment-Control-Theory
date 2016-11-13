@@ -39,7 +39,7 @@ enc2 = interp1(t_input,enc2_input,t);                           % values of enc2
 
 % Apply average filter
 v = average_filter(v,period);
-enc1 = average_filter(enc2,period);
+enc1 = average_filter(enc1,period);
 enc2 = average_filter(enc2,period);
 t = t(1:length(v));
 
@@ -64,15 +64,17 @@ ylabel('value encoder 2')
 %% Calculating speeds
 
 enc1_speed = central_diff(enc1, t);
-enc1_speed = enc1_speed - enc1_speed(1);
+%enc1_speed = enc1_speed - enc1_speed(1);    % OUTCOMMENTED BECAUSE GIVES
+%WRONG DATA
 enc2_speed = central_diff(enc2, t);
-enc2_speed = enc2_speed - enc2_speed(1);
+%enc2_speed = enc2_speed - enc2_speed(1);   % OUTCOMMENTED BECAUSE GIVES
+%WRONG DATA
 
-% Extra butterworth filter against noise
-[B_filt, A_filt] = butter(6,0.3);
-v = filter(B_filt, A_filt, v);
-enc1_speed = filter(B_filt, A_filt, enc1_speed);
-enc2_speed = filter(B_filt, A_filt, enc2_speed);
+% % Extra butterworth filter against noise  DIDN'T WORK ??
+% [B_filt, A_filt] = butter(6,0.3);
+% v = filter(B_filt, A_filt, v);
+% enc1_speed = filter(B_filt, A_filt, enc1_speed);
+% enc2_speed = filter(B_filt, A_filt, enc2_speed);
 
 figure('name', 'Processed input data')
 subplot(3,1,1)
@@ -168,27 +170,20 @@ ylabel('\angleH_{v,enc2} [°]')
 
 %% Finding least squares solution
 % encoder 1
-u = v - mean(v);
-enc1_speed_gem = enc1_speed - mean(enc1_speed);
-A = u(3:end);
-B1 = [-u(2:end-1), u(1:end-2), enc1_speed_gem(2:end-1), enc1_speed_gem(1:end-2)];
-phi_1 = B1\A;    %[c, d, a, b]
-
-teller_1 = [0, phi_1(3), phi_1(4)];
-noemer_1 = [1, phi_1(1), phi_1(2)];
-sys_d_1 = tf(teller_1, noemer_1, Ts);
+number_of_steps = 2;
+[v_filt1,enc1_speed_filt,sys1, teller1, noemer1] = least_squares_filtered(v,enc1_speed,number_of_steps, Ts);
 
 %calculation poles and zeros encoder 1
-[Wn1, zeta1, P1] = damp(sys_d_1);
+[Wn1, zeta1, P1] = damp(sys1);
 omega_n1_cont = Wn1
 poles_1 = P1
-zeros_1 = zero(sys_d_1)
+zeros_1 = zero(sys1)
 
 %Bode plot encoder 1
 figure('name','Bodeplot least squares solution encoder 1')
-bode(sys_d_1)
+bode(sys1)
 
-FRF_lin1 = freqz(teller_1, noemer_1, f, fs);
+FRF_lin1 = freqz(teller1, noemer1, f, fs);
 figure('name','Comparison bode plots encoder 1')
 subplot(2,1,1)
 semilogx(f, 20*log10(abs(enc1_f./v_f)), f, 20*log10(abs(FRF_lin1)), '--', 'LineWidth', 1)
@@ -207,26 +202,19 @@ legend('emp', 'est')
 
 
 % encoder 2
-enc2_speed_gem = enc2_speed - mean(enc2_speed);
+[v_filt2,enc2_speed_filt,sys2, teller2, noemer2] = least_squares_filtered(v,enc2_speed,number_of_steps, Ts);
 
-B2 = [-u(2:end-1), u(1:end-2), enc2_speed_gem(2:end-1), enc2_speed_gem(1:end-2)];
-phi_2 = B2\A;    %[c, d, a, b]
-
-teller_2 = [0, phi_2(3), phi_2(4)];
-noemer_2 = [1, phi_2(1), phi_2(2)];
-sys_d_2 = tf(teller_2, noemer_2, Ts);
-
-%Calculation poles and zeros encoder 2
-[Wn2, zeta2, P2] = damp(sys_d_2);
+%calculation poles and zeros encoder 1
+[Wn2, zeta2, P2] = damp(sys2);
 omega_n2_cont = Wn2
 poles_2 = P2
-zeros_2 = zero(sys_d_2)
+zeros_2 = zero(sys2)
 
-%Bode plot encoder 2
+%Bode plot encoder 1
 figure('name','Bodeplot least squares solution encoder 2')
-bode(sys_d_2)
+bode(sys2)
 
-FRF_lin2 = freqz(teller_2, noemer_2, f, fs);
+FRF_lin2 = freqz(teller2, noemer2, f, fs);
 figure('name','Comparison bode plots encoder 2')
 subplot(2,1,1)
 semilogx(f, 20*log10(abs(enc2_f./v_f)), f, 20*log10(abs(FRF_lin2)), '--', 'LineWidth', 1)

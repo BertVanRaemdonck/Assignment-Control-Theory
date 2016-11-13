@@ -30,7 +30,7 @@ enc2 = interp1(t_input,enc2_input,t);                           % values of enc2
 
 % Apply average filter
 v = average_filter(v,period);
-enc1 = average_filter(enc2,period);
+enc1 = average_filter(enc1,period);
 enc2 = average_filter(enc2,period);
 t = t(1:length(v));
 
