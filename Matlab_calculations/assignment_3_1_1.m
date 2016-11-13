@@ -8,8 +8,11 @@ fs = 100;   % Hz
 Ts = 1/fs;  % s
 
 %% Cleaning and viewing data
-type = 'rand'       % type of the signal: 'block', 'rand', ...
-period = 1000;      % period of the signal, 0 if it isn't periodical
+type = 'rand'           % type of the signal: 'block', 'rand', ...
+period = 1000;          % period of the signal, 0 if it isn't periodical
+number_of_steps = 3;    % number of iterations for iterative least squares method
+factor_butter = 0.3;    % between 0 and 1, for butter function
+
 if period > 0
     log_name = sprintf('log_gpio_%s_(%d).xml', type, period);
 else
@@ -71,7 +74,7 @@ enc2_speed = central_diff(enc2, t);
 %if commented
 
 % Extra butterworth filter against noise  DIDN'T WORK ??
-[B_filt, A_filt] = butter(6,0.3);
+[B_filt, A_filt] = butter(6,factor_butter);
 v = filter(B_filt, A_filt, v);
 enc1_speed = filter(B_filt, A_filt, enc1_speed);
 enc2_speed = filter(B_filt, A_filt, enc2_speed);
@@ -170,7 +173,7 @@ ylabel('\angleH_{v,enc2} [°]')
 
 %% Finding least squares solution
 % encoder 1
-number_of_steps = 2;
+
 [v_filt1,enc1_speed_filt,sys1, teller1, noemer1] = least_squares_filtered(v,enc1_speed,number_of_steps, Ts);
 
 %calculation poles and zeros encoder 1
