@@ -11,7 +11,7 @@ function [data1_filt,data2_filt,sys, teller, noemer] = least_squares_filtered(da
 data1_gem = data1 - mean(data1);
 data2_gem = data2 - mean(data2);
 A = data1_gem(3:end);
-B = [-data1_gem(2:end-1), data1_gem(1:end-2), data2_gem(2:end-1), data2_gem(1:end-2)];
+B = [-data1_gem(2:end-1), -data1_gem(1:end-2), data2_gem(2:end-1), data2_gem(1:end-2)];
 phi= B\A;    %[c, d, a, b]
 
 teller = [0, phi(3), phi(4)];
@@ -26,16 +26,16 @@ end
 if number_of_steps > 1
     step = 1;
     while step < number_of_steps
-        teller_filt = [1];
+        teller_filt = [0, 0, 1];
         noemer_filt = [1, phi(1), phi(2)];
         
-        data1_filt = filter(data1, teller_filt, noemer_filt);
-        data2_filt = filter(data2, teller_filt, noemer_filt);
+        data1_filt = filter(teller_filt, noemer_filt, data1);
+        data2_filt = filter(teller_filt, noemer_filt, data2);
         
         data1_filt_gem = data1_filt - mean(data1_filt);
         data2_filt_gem = data2_filt - mean(data2_filt);
         A = data1_filt_gem(3:end);
-        B = [-data1_filt_gem(2:end-1), data1_filt_gem(1:end-2), data2_filt_gem(2:end-1), data2_filt_gem(1:end-2)];
+        B = [-data1_filt_gem(2:end-1), -data1_filt_gem(1:end-2), data2_filt_gem(2:end-1), data2_filt_gem(1:end-2)];
         phi = B\A;    %[c, d, a, b]
 
         teller = [0, phi(3), phi(4)];

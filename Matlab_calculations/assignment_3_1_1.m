@@ -64,17 +64,17 @@ ylabel('value encoder 2')
 %% Calculating speeds
 
 enc1_speed = central_diff(enc1, t);
-%enc1_speed = enc1_speed - enc1_speed(1);    % OUTCOMMENTED BECAUSE GIVES
-%WRONG DATA
+%enc1_speed = enc1_speed - enc1_speed(1);     % much better approximations
+%if commented
 enc2_speed = central_diff(enc2, t);
-%enc2_speed = enc2_speed - enc2_speed(1);   % OUTCOMMENTED BECAUSE GIVES
-%WRONG DATA
+%enc2_speed = enc2_speed - enc2_speed(1);     % much better approximations
+%if commented
 
-% % Extra butterworth filter against noise  DIDN'T WORK ??
-% [B_filt, A_filt] = butter(6,0.3);
-% v = filter(B_filt, A_filt, v);
-% enc1_speed = filter(B_filt, A_filt, enc1_speed);
-% enc2_speed = filter(B_filt, A_filt, enc2_speed);
+% Extra butterworth filter against noise  DIDN'T WORK ??
+[B_filt, A_filt] = butter(6,0.3);
+v = filter(B_filt, A_filt, v);
+enc1_speed = filter(B_filt, A_filt, enc1_speed);
+enc2_speed = filter(B_filt, A_filt, enc2_speed);
 
 figure('name', 'Processed input data')
 subplot(3,1,1)
