@@ -8,9 +8,10 @@ fs = 100;   % Hz
 Ts = 1/fs;  % s
 
 %% Cleaning and viewing data
-type = 'rand'       % type of the signal: 'block', 'rand', ...
-period = 1000;      % period of the signal, 0 if it isn't periodical
-number_of_steps = 3; % number of iterations for iterative least squares method
+type = 'block'           % type of the signal: 'block', 'rand', ...
+period = 1000;          % period of the signal, 0 if it isn't periodical
+number_of_steps = 1;    % number of iterations for iterative least squares method
+factor_butter = 0.3;    % between 0 and 1, for butter function
 
 if period > 0
     log_name = sprintf('log_gpio_%s_(%d).xml', type, period);
@@ -66,11 +67,12 @@ ylabel('value encoder 2')
 %% Calculating speeds
 
 enc1_speed = central_diff(enc1, t);
-%enc1_speed = enc1_speed - enc1_speed(1);     % much better approximations
-%if commented
+enc1_speed1 = enc1_speed(1);                 % must be saved for later
+enc1_speed = enc1_speed - enc1_speed(1);     % must start with zero value for fft
 enc2_speed = central_diff(enc2, t);
-%enc2_speed = enc2_speed - enc2_speed(1);     % much better approximations
-%if commented
+enc2_speed1 = enc2_speed(1);                 % must be saved for later
+enc2_speed = enc2_speed - enc2_speed(1);     % must start with zero value for fft
+
 
 % Extra butterworth filter against noise  DIDN'T WORK ??
 [B_filt, A_filt] = butter(6,factor_butter);
@@ -84,11 +86,11 @@ plot(t, v);
 xlabel('t [ms]')
 ylabel('v [mV]')
 subplot(3,1,2)
-plot(t, enc1_speed);
+plot(t, enc1_speed + enc1_speed1);              % compensate back for setting speed(1) to zero
 xlabel('t [ms]')
 ylabel('speed encoder 1')
 subplot(3,1,3)
-plot(t, enc2_speed);
+plot(t, enc2_speed + enc2_speed1);              % compensate back for setting speed(1) to zero
 xlabel('t [ms]')
 ylabel('speed encoder 2')
 
@@ -172,6 +174,8 @@ ylabel('\angleH_{v,enc2} [°]')
 
 %% Finding least squares solution
 % encoder 1
+enc1_speed = enc1_speed + enc1_speed1;          % compensate back for setting speed(1) to zero
+enc2_speed = enc2_speed + enc2_speed1;          % compensate back for setting speed(1) to zero
 
 [v_filt1,enc1_speed_filt,sys1, teller1, noemer1] = least_squares_filtered(v,enc1_speed,number_of_steps, Ts);
 
@@ -201,6 +205,17 @@ axis tight
 xlabel('f  [Hz]')
 ylabel('\phi(FRF)  [^\circ]')
 legend('emp', 'est')
+
+% Time simulation of system encoder 1
+time=0:Ts:(length(v)-1)*Ts;
+figure('name','lsim encoder 1')
+plot(time,enc1_speed)
+hold on
+lsim(sys1,v*(1e-7),time,'--')     % FACTOR TOEGEVOEGD!!!!
+xlabel('t [s]')
+ylabel('V [mV]')
+legend('emp','est')
+hold off
 
 
 % encoder 2
@@ -232,5 +247,99 @@ axis tight
 xlabel('f  [Hz]')
 ylabel('\phi(FRF)  [^\circ]')
 legend('emp', 'est')
+
+% Time simulation of system encoder 2
+figure('name','lsim encoder 2')
+plot(time,enc2_speed)
+hold on
+lsim(sys2,v*(1e-7),time,'--')     % FACTOR TOEGEVOEGD!!!!
+xlabel('t [s]')
+ylabel('speed [?]')
+legend('emp','est')
+hold off
+
+
+%% Checking model for other input
+% Cleaning and viewing data
+type2 = 'block'           % type of the signal: 'block', 'rand', ...
+period2 = 1000;          % period of the signal, 0 if it isn't periodical
+number_of_steps2 = 1;    % number of iterations for iterative least squares method
+factor_butter2 = 0.3;    % between 0 and 1, for butter function
+
+if period2 > 0
+    log_name2 = sprintf('log_gpio_%s_(%d).xml', type2, period2);
+else
+    log_name2 = sprintf('log_gpio_%s.xml', type2);
+end
+rec_random2 = readlog(log_name2);
+
+period2 = period2 + 1;
+
+
+% raw input data - these are sampled at a non-uniform rate!
+t_input2 = rec_random1.getData('time');
+v_input2 = rec_random1.getData('Voltage');
+enc1_input2 = rec_random1.getData('Encoder1');
+enc2_input2 = rec_random1.getData('Encoder2');
+
+% Unwrapping the values of the encoder
+enc_bits = 16;  % amount of bits used by the encoder
+enc1_input2 = cust_unwrap(enc1_input2, enc_bits);
+enc2_input2 = cust_unwrap(enc2_input2, enc_bits);
+
+% Interpolate the input data to uniform timesteps 
+t2 = (t_input2(1):Ts*1e3:t_input2(1)+(length(t_input2)-1)*Ts*1e3)'; % the equivalent of t_input if Ts were truly uniform
+v2 = v_input2;                                                    % v doesn't have to be interpolated because the Arduino does a zoh                  
+enc12 = interp1(t_input2,enc1_input2,t);                           % values of enc1 at the corresponding times
+enc22 = interp1(t_input2,enc2_input2,t);                           % values of enc2 at the corresponding times
+
+
+% Apply average filter
+v2 = average_filter(v2,period);
+enc12 = average_filter(enc12,period);
+enc22 = average_filter(enc22,period);
+t2 = t2(1:length(v2));
+
+% Calculating speeds
+enc12_speed = central_diff(enc12, t);
+enc12_speed1 = enc12_speed(1);                 % must be saved for later
+enc12_speed = enc12_speed - enc12_speed(1);     % must start with zero value for fft
+enc22_speed = central_diff(enc22, t);
+enc22_speed1 = enc22_speed(1);                 % must be saved for later
+enc22_speed = enc22_speed - enc22_speed(1);     % must start with zero value for fft
+
+
+% Extra butterworth filter against noise  DIDN'T WORK ??
+[B_filt2, A_filt2] = butter(6,factor_butter2);
+v2 = filter(B_filt2, A_filt2, v2);
+enc12_speed = filter(B_filt2, A_filt2, enc12_speed);
+enc22_speed = filter(B_filt2, A_filt2, enc22_speed);
+
+% encoder 1
+enc12_speed = enc12_speed + enc12_speed1;          % compensate back for setting speed(1) to zero
+enc22_speed = enc22_speed + enc22_speed1;          % compensate back for setting speed(1) to zero
+
+% Time simulation of system encoder 1 for input 2
+time2=0:Ts:(length(v2)-1)*Ts;
+figure('name','lsim encoder 1 input 2')
+plot(time2,enc12_speed)
+hold on
+lsim(sys1,v2*(1e-7),time2,'--')     % FACTOR TOEGEVOEGD!!!!
+xlabel('t [s]')
+ylabel('speed [?]')
+legend('emp','est')
+hold off
+
+% Time simulation of system encoder 2 input 2
+figure('name','lsim encoder 2 input 2')
+plot(time2,enc22_speed)
+hold on
+lsim(sys2,v2*(1e-7),time2,'--')     % FACTOR TOEGEVOEGD!!!!
+xlabel('t [s]')
+ylabel('speed [?]')
+legend('emp','est')
+hold off
+
+
 
 
