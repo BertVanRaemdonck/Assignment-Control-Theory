@@ -7,36 +7,34 @@ clear
 fs = 100;   % Hz
 Ts = 1/fs;  % s
 
-type = 'block'           % type of the signal: 'block', 'rand', ...
+type = 'block';         % type of the signal: 'block', 'rand', ...
 period = 1000;          % period of the signal, 0 if it isn't periodical
 number_of_steps = 1;    % number of iterations for iterative least squares method
-factor_butter = 0.3;    % between 0 and 1, for butter function
+butter_cutoff = 0.3;    % between 0 and 1, for butter function, set to 1 to disable filter
 
-type2 = 'block'           % type of the signal: 'block', 'rand', ...
-period2 = 2000;          % period of the signal, 0 if it isn't periodical
-number_of_steps2 = 1;    % number of iterations for iterative least squares method
-factor_butter2 = 0.3;    % between 0 and 1, for butter function
+type2 = 'block';        % type of the signal: 'block', 'rand', ...
+period2 = 2000;         % period of the signal, 0 if it isn't periodical
+number_of_steps2 = 1;   % number of iterations for iterative least squares method
+butter_cutoff2 = 0.3;   % between 0 and 1, for butter function, set to 1 to disable filter
 
-schaal_lsim_input = 1%*1e-3;     % scale used for scaling lsim, should be 1, but doesn't work :(
-schaal_lsim_output = 1%*2.2e3;
 
 %% Cleaning and viewing data
 
+% compile file name and import data
 if period > 0
     log_name = sprintf('log_gpio_%s_(%d).xml', type, period);
 else
     log_name = sprintf('log_gpio_%s.xml', type);
 end
-rec_random1 = readlog(log_name);
+rec = readlog(log_name);
 
 period = period + 1;
 
-
 % raw input data - these are sampled at a non-uniform rate!
-t_input = rec_random1.getData('time');
-v_input = rec_random1.getData('Voltage');
-enc1_input = rec_random1.getData('Encoder1');
-enc2_input = rec_random1.getData('Encoder2');
+t_input = rec.getData('time');
+v_input = rec.getData('Voltage');
+enc1_input = rec.getData('Encoder1');
+enc2_input = rec.getData('Encoder2');
 
 % Unwrapping the values of the encoder
 enc_bits = 16;  % amount of bits used by the encoder
@@ -48,6 +46,7 @@ t = (t_input(1):Ts*1e3:t_input(1)+(length(t_input)-1)*Ts*1e3)'; % the equivalent
 v = v_input;                                                    % v doesn't have to be interpolated because the Arduino does a zoh                  
 enc1 = interp1(t_input,enc1_input,t);                           % values of enc1 at the corresponding times
 enc2 = interp1(t_input,enc2_input,t);                           % values of enc2 at the corresponding times
+t = 1e-3*(t - t_input(1));                                      % set t to be in s and start at 0 for convenience
 
 % Apply average filter
 v = average_filter(v,period);
@@ -71,23 +70,18 @@ xlabel('t [ms]')
 ylabel('value encoder 2')
 
 
-
-
 %% Calculating speeds
 
-enc1_speed = central_diff(enc1, t);
-enc1_speed1 = enc1_speed(1);                 % must be saved for later
-enc1_speed = enc1_speed - enc1_speed(1);     % must start with zero value for fft
-enc2_speed = central_diff(enc2, t);
-enc2_speed1 = enc2_speed(1);                 % must be saved for later
-enc2_speed = enc2_speed - enc2_speed(1);     % must start with zero value for fft
+enc1_v = central_diff(enc1, t);
+enc2_v = central_diff(enc2, t);
 
-
-% Extra butterworth filter against noise  DIDN'T WORK ??
-[B_filt, A_filt] = butter(6,factor_butter);
-v = filter(B_filt, A_filt, v);
-enc1_speed = filter(B_filt, A_filt, enc1_speed);
-enc2_speed = filter(B_filt, A_filt, enc2_speed);
+% Extra butterworth filter against noise
+if (0 < butter_cutoff) && (butter_cutoff < 1)
+    [B_filt, A_filt] = butter(6, butter_cutoff);
+    v = filter(B_filt, A_filt, v);
+    enc1_v = filter(B_filt, A_filt, enc1_v-enc1_v(1)) + enc1_v(1);
+    enc2_v = filter(B_filt, A_filt, enc2_v-enc2_v(1)) + enc2_v(1);
+end
 
 figure('name', 'Processed input data')
 subplot(3,1,1)
@@ -95,21 +89,21 @@ plot(t, v);
 xlabel('t [ms]')
 ylabel('v [mV]')
 subplot(3,1,2)
-plot(t, enc1_speed + enc1_speed1);              % compensate back for setting speed(1) to zero
+plot(t, enc1_v);             
 xlabel('t [ms]')
 ylabel('speed encoder 1')
 subplot(3,1,3)
-plot(t, enc2_speed + enc2_speed1);              % compensate back for setting speed(1) to zero
+plot(t, enc2_v);             
 xlabel('t [ms]')
 ylabel('speed encoder 2')
 
 %% Converting to frequency domain
 
-n = size(t,1);
-f = fs*(-n/2:n/2-1)/n;
-v_f = fftshift(fft(v,n))/n;
-enc1_f = fftshift(fft(enc1_speed,n))/n;
-enc2_f = fftshift(fft(enc2_speed,n))/n;
+nb_freqs = size(t,1);
+f = fs*(-nb_freqs/2:nb_freqs/2-1)/nb_freqs;
+v_f = fftshift(fft(v,nb_freqs))/nb_freqs;
+enc1_v_f = fftshift(fft(enc1_v,nb_freqs))/nb_freqs;
+enc2_v_f = fftshift(fft(enc2_v,nb_freqs))/nb_freqs;
 
 figure('name', 'Input data in the frequency domain')
 subplot(3,2,1)
@@ -122,152 +116,101 @@ xlabel('f [Hz]')
 ylabel('\anglev [°]')
 
 subplot(3,2,3)
-plot(f, abs(enc1_f))
+plot(f, abs(enc1_v_f))
 xlabel('f [Hz]')
 ylabel('|enc1|')
 subplot(3,2,4)
-plot(f, unwrap(angle(enc1_f)))
+plot(f, unwrap(angle(enc1_v_f)))
 xlabel('f [Hz]')
 ylabel('\angleenc1 [°]')
 
 subplot(3,2,5)
-plot(f, abs(enc2_f))
+plot(f, abs(enc2_v_f))
 xlabel('f [Hz]')
 ylabel('|enc2|')
 subplot(3,2,6)
-plot(f, unwrap(angle(enc2_f)))
+plot(f, unwrap(angle(enc2_v_f)))
 xlabel('f [Hz]')
 ylabel('\angleenc2 [°]')
 
 
-figure('name', 'Bodeplot overdrachtsfunctie v -> enc1_speed')
-subplot(2,1,1)
-semilogx(f, 20*log10(abs(enc1_f./v_f)))
-xlabel('f [Hz]')
-ylabel('|H_{v,enc1}| [dB]')
-subplot(2,1,2)
-semilogx(f, 180/pi*unwrap(angle(enc1_f./v_f)))
-xlabel('f [Hz]')
-ylabel('\angleH_{v,enc1} [°]')
-
-
-figure('name', 'Bodeplot overdrachtsfunctie v -> enc2_speed')
-subplot(2,1,1)
-semilogx(f, 20*log10(abs(enc2_f./v_f)))
-xlabel('f [Hz]')
-ylabel('|H_{v,enc2}| [dB]')
-subplot(2,1,2)
-semilogx(f, 180/pi*unwrap(angle(enc2_f./v_f)))
-xlabel('f [Hz]')
-ylabel('\angleH_{v,enc2} [°]')
-
-%  % If you want te see all bode plots together, uncomment this section
-% figure('name', 'Bodeplot overdrachtsfunctie vergelijken')
-% subplot(2,2,1)
-% semilogx(f, 20*log10(abs(enc1_f./v_f)))
-% xlabel('f [Hz]')
-% ylabel('|H_{v,enc1}| [dB]')
-% subplot(2,2,3)
-% semilogx(f, 180/pi*unwrap(angle(enc1_f./v_f)))
-% xlabel('f [Hz]')
-% ylabel('\angleH_{v,enc1} [°]')
-% subplot(2,2,2)
-% semilogx(f, 20*log10(abs(enc2_f./v_f)))
-% xlabel('f [Hz]')
-% ylabel('|H_{v,enc2}| [dB]')
-% subplot(2,2,4)
-% semilogx(f, 180/pi*unwrap(angle(enc2_f./v_f)))
-% xlabel('f [Hz]')
-% ylabel('\angleH_{v,enc2} [°]')
-
-
 %% Finding least squares solution
-% encoder 1
-enc1_speed = enc1_speed + enc1_speed1;          % compensate back for setting speed(1) to zero
-enc2_speed = enc2_speed + enc2_speed1;          % compensate back for setting speed(1) to zero
 
-[v_filt1,enc1_speed_filt,sys1, teller1, noemer1] = least_squares_filtered(v,enc1_speed,number_of_steps, Ts);
+[v_filt_enc1, enc1_v_filt, sys_enc1, num_enc1, den_enc1] = ...
+        least_squares_filtered(v,enc1_v,number_of_steps, Ts);
+[v_filt_enc2, enc2_v_filt, sys_enc2, num_enc2, den_enc2] = ...
+        least_squares_filtered(v,enc2_v,number_of_steps, Ts);
 
-%calculation poles and zeros encoder 1
-[Wn1, zeta1, P1] = damp(sys1);
-omega_n1_cont = Wn1
-poles_1 = P1
-zeros_1 = zero(sys1)
+% calculation poles and zeros
+[omega_n_enc1_cont, zeta_enc1, poles_enc1] = damp(sys_enc1);
+zeros_enc1 = zero(sys_enc1)
+[omega_n_enc2_cont, zeta_enc2, poles_enc2] = damp(sys_enc2);
+zeros_enc2 = zero(sys_enc2)
 
-%Bode plot encoder 1
-figure('name','Bodeplot least squares solution encoder 1')
-bode(sys1)
+%% Checking least squares approximation in frequency domain
 
-FRF_lin1 = freqz(teller1, noemer1, f, fs);
-figure('name','Comparison bode plots encoder 1')
-subplot(2,1,1)
-semilogx(f, 20*log10(abs(enc1_f./v_f)), f, 20*log10(abs(FRF_lin1)), '--', 'LineWidth', 1)
+FRF_enc1 = freqz(num_enc1, den_enc1, f, fs);
+FRF_enc2 = freqz(num_enc2, den_enc2, f, fs);
+
+figure('name','Comparison bode plots')
+subplot(2,2,1)
+semilogx(f, 20*log10(abs(enc1_v_f./v_f)), f, 20*log10(abs(FRF_enc1)), '--', 'LineWidth', 1)
 grid on
 axis tight
 xlabel('f  [Hz]')
-ylabel('|FRF|  [m]')
+ylabel('|FRF|  [dB]')
 legend('emp', 'est')
-subplot(2,1,2)
-semilogx(f, 180/pi*unwrap(angle(enc1_f./v_f)), f, 180/pi*unwrap(angle(FRF_lin1)), '--', 'LineWidth', 1)
+title('encoder 1')
+subplot(2,2,3)
+semilogx(f, 180/pi*unwrap(angle(enc1_v_f./v_f)), f, 180/pi*unwrap(angle(FRF_enc1)), '--', 'LineWidth', 1)
 grid on
 axis tight
 xlabel('f  [Hz]')
 ylabel('\phi(FRF)  [^\circ]')
 legend('emp', 'est')
 
-% Time simulation of system encoder 1
-time=0:Ts:(length(v)-1)*Ts;
-y_enc1 = lsim(sys1*schaal_lsim_output,v*(schaal_lsim_input),time,'--');     % FACTOR TOEGEVOEGD!!!!
-figure('name','lsim encoder 1')
-plot(time,enc1_speed)
+subplot(2,2,2)
+semilogx(f, 20*log10(abs(enc2_v_f./v_f)), f, 20*log10(abs(FRF_enc2)), '--', 'LineWidth', 1)
+grid on
+axis tight
+xlabel('f  [Hz]')
+ylabel('|FRF|  [dB]')
+legend('emp', 'est')
+title('encoder 2')
+subplot(2,2,4)
+semilogx(f, 180/pi*unwrap(angle(enc2_v_f./v_f)), f, 180/pi*unwrap(angle(FRF_enc2)), '--', 'LineWidth', 1)
+grid on
+axis tight
+xlabel('f  [Hz]')
+ylabel('\phi(FRF)  [^\circ]')
+legend('emp', 'est')
+
+%% Checking least squares approximation in time domain
+sys_enc1_ss = ss(sys_enc1); % state space equivalent of the system, needed to set initial conditions for lsim correctly, see https://nl.mathworks.com/matlabcentral/answers/99019-how-can-i-set-the-initial-value-for-the-output-y-1-when-using-the-lsim-function-in-control-syst
+sys_enc2_ss = ss(sys_enc2);
+
+enc1_v_est = lsim(sys_enc1_ss, v, t, [0;enc1_v(1)/sys_enc1_ss.C(end)], '--');
+enc2_v_est = lsim(sys_enc2_ss, v, t, [0;enc2_v(1)/sys_enc2_ss.C(end)], '--');
+
+figure('name','Comparison time response')
+subplot(2,1,1)
+plot(t,enc1_v)
 hold on
-plot(time,y_enc1,'--')
+plot(t,enc1_v_est,'--')
 xlabel('t [s]')
 ylabel('speed [?]')
 legend('emp','est')
+title('encoder 1')
 hold off
 
-
-% encoder 2
-[v_filt2,enc2_speed_filt,sys2, teller2, noemer2] = least_squares_filtered(v,enc2_speed,number_of_steps, Ts);
-
-%calculation poles and zeros encoder 1
-[Wn2, zeta2, P2] = damp(sys2);
-omega_n2_cont = Wn2
-poles_2 = P2
-zeros_2 = zero(sys2)
-
-%Bode plot encoder 1
-figure('name','Bodeplot least squares solution encoder 2')
-bode(sys2)
-
-FRF_lin2 = freqz(teller2, noemer2, f, fs);
-figure('name','Comparison bode plots encoder 2')
-subplot(2,1,1)
-semilogx(f, 20*log10(abs(enc2_f./v_f)), f, 20*log10(abs(FRF_lin2)), '--', 'LineWidth', 1)
-grid on
-axis tight
-xlabel('f  [Hz]')
-ylabel('|FRF|  [m]')
-legend('emp', 'est')
 subplot(2,1,2)
-semilogx(f, 180/pi*unwrap(angle(enc2_f./v_f)), f, 180/pi*unwrap(angle(FRF_lin2)), '--', 'LineWidth', 1)
-grid on
-axis tight
-xlabel('f  [Hz]')
-ylabel('\phi(FRF)  [^\circ]')
-legend('emp', 'est')
-
-% Time simulation of system encoder 2
-y_enc2 = lsim(sys2*schaal_lsim_output,v*(schaal_lsim_input),time,'--');    % FACTOR TOEGEVOEGD!!!!
-
-figure('name','lsim encoder 2')
-plot(time,enc2_speed)
+plot(t,enc2_v)
 hold on
-plot(time,y_enc2,'--')
+plot(t,enc2_v_est,'--')
 xlabel('t [s]')
 ylabel('speed [?]')
 legend('emp','est')
+title('encoder 2')
 hold off
 
 
@@ -283,7 +226,6 @@ rec_random2 = readlog(log_name2);
 
 period2 = period2 + 1;
 
-
 % raw input data - these are sampled at a non-uniform rate!
 t_input2 = rec_random2.getData('time');
 v_input2 = rec_random2.getData('Voltage');
@@ -298,27 +240,27 @@ enc2_input2 = cust_unwrap(enc2_input2, enc_bits);
 % Interpolate the input data to uniform timesteps 
 t2 = (t_input2(1):Ts*1e3:t_input2(1)+(length(t_input2)-1)*Ts*1e3)'; % the equivalent of t_input if Ts were truly uniform
 v2 = v_input2;                                                    % v doesn't have to be interpolated because the Arduino does a zoh                  
-enc12 = interp1(t_input2,enc1_input2,t);                           % values of enc1 at the corresponding times
-enc22 = interp1(t_input2,enc2_input2,t);                           % values of enc2 at the corresponding times
-
+enc12 = interp1(t_input2,enc1_input2,t2);                           % values of enc1 at the corresponding times
+enc22 = interp1(t_input2,enc2_input2,t2);                           % values of enc2 at the corresponding times
+t2 = 1e-3*(t2 - t_input2(1));
 
 % Apply average filter
-v2 = average_filter(v2,period);
-enc12 = average_filter(enc12,period);
-enc22 = average_filter(enc22,period);
+v2 = average_filter(v2,period2);
+enc12 = average_filter(enc12,period2);
+enc22 = average_filter(enc22,period2);
 t2 = t2(1:length(v2));
 
 % Calculating speeds
-enc12_speed = central_diff(enc12, t);
+enc12_speed = central_diff(enc12, t2);
 enc12_speed1 = enc12_speed(1);                 % must be saved for later
 enc12_speed = enc12_speed - enc12_speed(1);     % must start with zero value for fft
-enc22_speed = central_diff(enc22, t);
+enc22_speed = central_diff(enc22, t2);
 enc22_speed1 = enc22_speed(1);                 % must be saved for later
 enc22_speed = enc22_speed - enc22_speed(1);     % must start with zero value for fft
 
 
 % Extra butterworth filter against noise  DIDN'T WORK ??
-[B_filt2, A_filt2] = butter(6,factor_butter2);
+[B_filt2, A_filt2] = butter(6,butter_cutoff2);
 v2 = filter(B_filt2, A_filt2, v2);
 enc12_speed = filter(B_filt2, A_filt2, enc12_speed);
 enc22_speed = filter(B_filt2, A_filt2, enc22_speed);
@@ -329,7 +271,7 @@ enc22_speed = enc22_speed + enc22_speed1;          % compensate back for setting
 
 % Time simulation of system encoder 1 for input 2
 time2=0:Ts:(length(v2)-1)*Ts;
-y2_enc1 = lsim(sys1*schaal_lsim_output,v2*(schaal_lsim_input),time2,'--');     % FACTOR TOEGEVOEGD!!!!
+y2_enc1 = lsim(sys_enc1,v2,time2,'--');     % FACTOR TOEGEVOEGD!!!!
 
 figure('name','lsim encoder 1 input 2')
 plot(time2,enc12_speed)
@@ -341,7 +283,7 @@ legend('emp','est')
 hold off
 
 % Time simulation of system encoder 2 input 2
-y2_enc2 = lsim(sys2*schaal_lsim_output,v2*(schaal_lsim_input),time2,'--');     % FACTOR TOEGEVOEGD!!!!
+y2_enc2 = lsim(sys_enc2,v2,time2,'--');     % FACTOR TOEGEVOEGD!!!!
 
 figure('name','lsim encoder 2 input 2')
 plot(time2,enc22_speed)
