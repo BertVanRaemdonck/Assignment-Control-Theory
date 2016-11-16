@@ -147,6 +147,17 @@ zeros_enc1 = zero(sys_enc1)
 [omega_n_enc2_cont, zeta_enc2, poles_enc2] = damp(sys_enc2);
 zeros_enc2 = zero(sys_enc2)
 
+% plotting bodeplots
+figure('name','Bodeplots calculated systems')
+subplot(2,1,1)
+bode(sys_enc1)
+grid on
+title('Bodeplot encoder 1')
+subplot(2,1,2)
+bode(sys_enc2)
+grid on
+title('Bodeplot encoder2')
+
 %% Checking least squares approximation in frequency domain
 
 FRF_enc1 = freqz(num_enc1, den_enc1, f, fs);
@@ -239,7 +250,7 @@ enc2_input2 = cust_unwrap(enc2_input2, enc_bits);
 
 % Interpolate the input data to uniform timesteps 
 t2 = (t_input2(1):Ts*1e3:t_input2(1)+(length(t_input2)-1)*Ts*1e3)'; % the equivalent of t_input if Ts were truly uniform
-v2 = v_input2;                                                    % v doesn't have to be interpolated because the Arduino does a zoh                  
+v2 = v_input2;                                                      % v doesn't have to be interpolated because the Arduino does a zoh                  
 enc12 = interp1(t_input2,enc1_input2,t2);                           % values of enc1 at the corresponding times
 enc22 = interp1(t_input2,enc2_input2,t2);                           % values of enc2 at the corresponding times
 t2 = 1e-3*(t2 - t_input2(1));
@@ -271,7 +282,7 @@ enc22_speed = enc22_speed + enc22_speed1;          % compensate back for setting
 
 % Time simulation of system encoder 1 for input 2
 time2=0:Ts:(length(v2)-1)*Ts;
-y2_enc1 = lsim(sys_enc1,v2,time2,'--');     % FACTOR TOEGEVOEGD!!!!
+y2_enc1 = lsim(sys_enc1,v2,time2,'--');    
 
 figure('name','lsim encoder 1 input 2')
 plot(time2,enc12_speed)
@@ -283,7 +294,7 @@ legend('emp','est')
 hold off
 
 % Time simulation of system encoder 2 input 2
-y2_enc2 = lsim(sys_enc2,v2,time2,'--');     % FACTOR TOEGEVOEGD!!!!
+y2_enc2 = lsim(sys_enc2,v2,time2,'--');     
 
 figure('name','lsim encoder 2 input 2')
 plot(time2,enc22_speed)
