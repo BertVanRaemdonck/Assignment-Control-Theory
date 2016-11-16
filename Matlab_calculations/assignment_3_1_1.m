@@ -17,7 +17,8 @@ period2 = 2000;          % period of the signal, 0 if it isn't periodical
 number_of_steps2 = 1;    % number of iterations for iterative least squares method
 factor_butter2 = 0.3;    % between 0 and 1, for butter function
 
-schaal_lsim = 1e-7;     % scale used for scaling lsim, should be zero, but doesn't work :(
+schaal_lsim_input = 1%*1e-3;     % scale used for scaling lsim, should be 1, but doesn't work :(
+schaal_lsim_output = 1%*2.2e3;
 
 %% Cleaning and viewing data
 
@@ -216,10 +217,11 @@ legend('emp', 'est')
 
 % Time simulation of system encoder 1
 time=0:Ts:(length(v)-1)*Ts;
+y_enc1 = lsim(sys1*schaal_lsim_output,v*(schaal_lsim_input),time,'--');     % FACTOR TOEGEVOEGD!!!!
 figure('name','lsim encoder 1')
 plot(time,enc1_speed)
 hold on
-lsim(sys1,v*(schaal_lsim),time,'--')     % FACTOR TOEGEVOEGD!!!!
+plot(time,y_enc1,'--')
 xlabel('t [s]')
 ylabel('speed [?]')
 legend('emp','est')
@@ -257,10 +259,12 @@ ylabel('\phi(FRF)  [^\circ]')
 legend('emp', 'est')
 
 % Time simulation of system encoder 2
+y_enc2 = lsim(sys2*schaal_lsim_output,v*(schaal_lsim_input),time,'--');    % FACTOR TOEGEVOEGD!!!!
+
 figure('name','lsim encoder 2')
 plot(time,enc2_speed)
 hold on
-lsim(sys2,v*(schaal_lsim),time,'--')     % FACTOR TOEGEVOEGD!!!!
+plot(time,y_enc2,'--')
 xlabel('t [s]')
 ylabel('speed [?]')
 legend('emp','est')
@@ -325,20 +329,24 @@ enc22_speed = enc22_speed + enc22_speed1;          % compensate back for setting
 
 % Time simulation of system encoder 1 for input 2
 time2=0:Ts:(length(v2)-1)*Ts;
+y2_enc1 = lsim(sys1*schaal_lsim_output,v2*(schaal_lsim_input),time2,'--');     % FACTOR TOEGEVOEGD!!!!
+
 figure('name','lsim encoder 1 input 2')
 plot(time2,enc12_speed)
 hold on
-lsim(sys1,v2*(schaal_lsim),time2,'--')     % FACTOR TOEGEVOEGD!!!!
+plot(time2,y2_enc1,'--')
 xlabel('t [s]')
 ylabel('speed [?]')
 legend('emp','est')
 hold off
 
 % Time simulation of system encoder 2 input 2
+y2_enc2 = lsim(sys2*schaal_lsim_output,v2*(schaal_lsim_input),time2,'--');     % FACTOR TOEGEVOEGD!!!!
+
 figure('name','lsim encoder 2 input 2')
 plot(time2,enc22_speed)
 hold on
-lsim(sys2,v2*(schaal_lsim),time2,'--')     % FACTOR TOEGEVOEGD!!!!
+plot(time2,y2_enc2,'--')
 xlabel('t [s]')
 ylabel('speed [?]')
 legend('emp','est')

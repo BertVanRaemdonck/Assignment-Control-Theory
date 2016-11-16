@@ -10,8 +10,13 @@ function [data1_filt,data2_filt,sys, teller, noemer] = least_squares_filtered(da
 
 data1_gem = data1 - mean(data1);
 data2_gem = data2 - mean(data2);
-A = data1_gem(3:end);
-B = [-data1_gem(2:end-1), -data1_gem(1:end-2), data2_gem(2:end-1), data2_gem(1:end-2)];
+%A = data1_gem(3:end);
+% foutief opgesteld eerst output (speed), erna input (voltage)
+A = data2_gem(3:end);
+
+%B = [-data1_gem(2:end-1), -data1_gem(1:end-2), data2_gem(2:end-1), data2_gem(1:end-2)];   
+ % foutief opgesteld eerst output (speed), erna input (voltage)
+B = [-data2_gem(2:end-1), -data2_gem(1:end-2), data1_gem(2:end-1), data1_gem(1:end-2)];
 phi= B\A;    %[c, d, a, b]
 
 teller = [0, phi(3), phi(4)];
@@ -34,8 +39,8 @@ if number_of_steps > 1
         
         data1_filt_gem = data1_filt - mean(data1_filt);
         data2_filt_gem = data2_filt - mean(data2_filt);
-        A = data1_filt_gem(3:end);
-        B = [-data1_filt_gem(2:end-1), -data1_filt_gem(1:end-2), data2_filt_gem(2:end-1), data2_filt_gem(1:end-2)];
+        A = data2_filt_gem(3:end);   % Hier ook aangepast
+        B = [-data2_filt_gem(2:end-1), -data2_filt_gem(1:end-2), data1_filt_gem(2:end-1), data1_filt_gem(1:end-2)];  % hier ook aangepast
         phi = B\A;    %[c, d, a, b]
 
         teller = [0, phi(3), phi(4)];
