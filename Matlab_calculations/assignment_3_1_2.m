@@ -20,8 +20,10 @@ low_exp_w = -1;     % w = logspace(low_exp_w,high_exp_w,number_points_w)
 high_exp_w = 3;
 number_points_w = 1000;
 
-PM_des = 55;        % desired phase marge
-phase_PI = 40;      % phase that PI controller may 'eat'
+PM_des1 = 55;        % desired phase marge of controller 1
+phase_PI1 = 40;      % phase that PI controller 1 may 'eat'
+PM_des2 = 55;        % desired phase marge of controller 2
+phase_PI2 = 40;      % phase that PI controller 2 may 'eat'
 
 % Taking data from assignment_3_1_1.m
 num_enc1_or = num_enc1;
@@ -53,10 +55,10 @@ w = logspace(low_exp_w,high_exp_w,number_points_w);
 
 %% design procedure PI encoder 1
 
-phase_co1 = -180 + PM_des + phase_PI;       % phase we want
+phase_co1 = -180 + PM_des1 + phase_PI1;       % phase we want
 omega_co1 = interp1(ph1_c, w, phase_co1);  % frequency with phase we want, will become new crossover frequency
 
-T_i1 = tan(pi/180*(90 - phase_PI))/omega_co1;  % integrated time constant of PI encoder 1
+T_i1 = tan(pi/180*(90 - phase_PI1))/omega_co1;  % time constant of PI encoder 1
 mag_PI_co1 = abs(1/(j*omega_co1)*(j*omega_co1+1/T_i1));  % magnitude of PI controller at crossover frequency
 K_1 = 1/(mag_PI_co1 * interp1(w, mag1_c, omega_co1));   % proportional constant of PI controller encoder 1
 
@@ -82,10 +84,10 @@ legend('enc1', 'enc1_PIcomp')
 
 %% design procedure PI encoder 2
 
-phase_co2 = -180 + PM_des + phase_PI;       % phase we want
+phase_co2 = -180 + PM_des2 + phase_PI2;       % phase we want
 omega_co2 = interp1(ph2_c, w, phase_co2);  % frequency with phase we want, will become new crossover frequency
 
-T_i2 = tan(pi/180*(90 - phase_PI))/omega_co2;  % integrated time constant of PI encoder 2
+T_i2 = tan(pi/180*(90 - phase_PI2))/omega_co2;  % time constant of PI encoder 2
 mag_PI_co2 = abs(1/(j*omega_co2)*(j*omega_co2+1/T_i2));  % magnitude of PI controller at crossover frequency
 K_2 = 1/(mag_PI_co2 * interp1(w, mag2_c, omega_co2));   % proportional constant of PI controller encoder 2
 
