@@ -20,6 +20,12 @@ low_exp_w = -1;     % w = logspace(low_exp_w,high_exp_w,number_points_w)
 high_exp_w = 3;
 number_points_w = 1000;
 
+nb_speed_ref = 300;    % number of points of vector with the reference speed it has to track
+mag_speed_ref = 4000;   % max magnitude of vector with the reference speed it has to track
+speed_ref = (mag_speed_ref/4)*ones([1,nb_speed_ref/3]);
+speed_ref = [speed_ref  (mag_speed_ref/2)*ones([1,nb_speed_ref/3])];
+speed_ref = [speed_ref  (mag_speed_ref/1)*ones([1,nb_speed_ref/3])];
+
 PM_des1 = 55;        % desired phase marge of controller 1
 phase_PI1 = 40;      % phase that PI controller 1 may 'eat'
 PM_des2 = 55;        % desired phase marge of controller 2
@@ -108,4 +114,45 @@ legend('enc2', 'enc2_PIcomp')
 figure('name', 'Bodeplot of the compensated system of encoder 2 discrete time')
 bode(sys_enc2_or, sys_enc2_PIcomp_d, w), grid
 legend('enc2', 'enc2_PIcomp')
+
+
+%% Testing controller
+% Making feedback loop
+sys_enc1_or_fb = feedback(sys_enc1_or,1);
+sys_enc2_or_fb = feedback(sys_enc2_or,1);
+
+sys_enc1_PIcomp_fb = feedback(sys_enc1_PIcomp_d,1);
+sys_enc2_PIcomp_fb = feedback(sys_enc2_PIcomp_d,1);
+
+% Time simulation of system encoders with controller
+time_fb =0:Ts:(length(speed_ref)-1)*Ts;
+y1_enc1_or_fb = lsim(sys_enc1_or_fb,speed_ref,time_fb);
+y1_enc1_PIcomp_fb = lsim(sys_enc1_PIcomp_fb,speed_ref,time_fb,'--'); 
+
+y1_enc2_or_fb = lsim(sys_enc2_or_fb,speed_ref,time_fb);
+y1_enc2_PIcomp_fb = lsim(sys_enc2_PIcomp_fb,speed_ref,time_fb,'--');    
+
+figure('name','lsim encoders with feedback loop')
+subplot(2,1,1)
+plot(time_fb,speed_ref)
+hold on
+plot(time_fb,y1_enc1_or_fb,':')
+hold on
+plot(time_fb,y1_enc1_PIcomp_fb,'--')
+xlabel('t [s]')
+ylabel('speed [?]')
+legend('reference input','without controller','with controller')
+title('encoder 1')
+hold off
+subplot(2,1,2)
+plot(time_fb,speed_ref)
+hold on
+plot(time_fb,y1_enc2_or_fb,':')
+hold on
+plot(time_fb,y1_enc2_PIcomp_fb,'--')
+xlabel('t [s]')
+ylabel('speed [?]')
+legend('reference input','without controller','with controller')
+title('encoder 2')
+hold off
 
