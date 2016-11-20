@@ -14,8 +14,6 @@ close all
 clc
 
 % parameters
-delta_phi = 45;  %graden
-add_phase_lag = 15; %graden
 low_exp_w = -1;     % w = logspace(low_exp_w,high_exp_w,number_points_w)
 high_exp_w = 3;
 number_points_w = 1000;
@@ -26,10 +24,10 @@ speed_ref = (mag_speed_ref/4)*ones([1,nb_speed_ref/3]);
 speed_ref = [speed_ref  (mag_speed_ref/2)*ones([1,nb_speed_ref/3])];
 speed_ref = [speed_ref  (mag_speed_ref/1)*ones([1,nb_speed_ref/3])];
 
-PM_des1 = 55;        % desired phase marge of controller 1
-phase_PI1 = 40;      % phase that PI controller 1 may 'eat'
-PM_des2 = 55;        % desired phase marge of controller 2
-phase_PI2 = 40;      % phase that PI controller 2 may 'eat'
+PM_des1 = 55;        % desired phase marge of controller 1      original was 55
+phase_PI1 = 55;      % phase that PI controller 1 may 'eat'     original was 40
+PM_des2 = 55;        % desired phase marge of controller 2      original was 55
+phase_PI2 = 40;      % phase that PI controller 2 may 'eat'     original was 40
 
 % Taking data from assignment_3_1_1.m
 num_enc1_or = num_enc1;
