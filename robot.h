@@ -37,6 +37,29 @@ private:
 	bool toggleButton(uint8_t button);
 	bool controlEnabled();
 
+  // Custom counter variable
+  float counter = 0.0;
+
+  // Sampling time
+  float Ts = 0.01;
+  
+  // Memory of the speed controller
+  float enc1_prev = 0.0;
+  float enc2_prev = 0.0;
+  
+  float ek_speed1[2] = {0.0, 0.0};
+  float uk_speed1[2] = {0.0, 0.0};
+  
+  float ek_speed2[2] = {0.0, 0.0};
+  float uk_speed2[2] = {0.0, 0.0};
+
+  // Parameters of the speed controller
+  float num_contr_speed1[2] = {9.0028, -5.3379};
+  float den_contr_speed1[2] = {1.0, -1.0}; 
+
+  float num_contr_speed2[2] = {12.2425, -9.2241};
+  float den_contr_speed2[2] = {1.0, -1.0};
+
 
 public:
     Robot(uint8_t ID = 0);
@@ -54,6 +77,8 @@ public:
   void ramp_input();
   void step_input();
   void block_input(float = 500);
+  void controller_speed(int, int);
+  void reset_controller();
 
 	///////
 	/// GET

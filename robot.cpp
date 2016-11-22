@@ -32,21 +32,6 @@ Robot::Robot(uint8_t ID):
 {
 	_pendulum->setScale(2.0f*M_PI/1023.0f);
 }
-
-  // Data for tutorial session controller
-  float Kp = 130000;
-  float Ki = 600000;
-  float Kd = 2000;
-  float Ts = 0.01;    // in s
-  
-  // initial values voor controller tutorial session
-  float e_kmin1 = 0;
-  float e_kmin2 = 0;
-  float u_kmin1 = 0;
-  float u_kmin2 = 0;
-
-  float V_ramp = 0;
-  int counter = 0;
   
 void Robot::init(){
 	//initialize the robot - sort of starting procedure
@@ -58,34 +43,65 @@ void Robot::controllerHook(){
   
 	if(controlEnabled()){
 		//write the control in here
-
-    // random_excitation(2000);
-    block_input(2000);
-
-    
-//     float set_point1 = System.getGPinFloat(1);
-//     float cur_pos1 = _encoder1 -> readRawValue();
-//
-//     float e_k = set_point1 - cur_pos1;
-//
-//     float u_k = (1/(Kp + Ki*Ts/2 + Kd*2/Ts)) * (e_k - e_kmin2 - u_kmin1*(Ki*Ts - 4/Ts) - u_kmin2*(-Kp + Ki*Ts/2 + Kd*2/Ts));
-//
-//     e_kmin2 = e_kmin1;
-//     e_kmin1 = e_k;
-//
-//     u_kmin2 = u_kmin1;
-//     u_kmin1 = u_k;
-//    
-//    _motor1 -> setBridgeVoltage(u_k); // set motor1 voltage to variable u_k
-//    System.setGPoutFloat(7 ,e_k); // write value 5.1 to floating point channel 7   ("FloatIn7")
-//    System.setGPoutFloat(6 ,u_k); // write value 5.1 to floating point channel 7   ("FloatIn7")
     
 	} else {
 		//set motor voltage to zero or it will keep on running...
     _motor1 -> setBridgeVoltage(0); // set motor1 voltage to 0 mV , i.e. 0V
     _motor2 -> setBridgeVoltage(0); // set motor2 voltage to 0V
+    // reset controller so that it does not do crazy things when we restart it
+    reset_controller();
 	}
 }
+
+void Robot::controller_speed(int speed1_des, int speed2_des)
+{
+  // read encoder values
+  int enc1 = _encoder1 ->readRawValue();
+  int enc2 = _encoder2 ->readRawValue();
+
+  // calculate new speed
+  float speed1_act = (enc1 - enc1_prev)/Ts;
+  float speed2_act = (enc2 - enc2_prev)/Ts;
+
+  // shift memories
+  for(int i = 2; i > 0; i--){
+    ek_speed1[i] = ek_speed1[i-1];
+    uk_speed1[i] = uk_speed1[i-1];
+    ek_speed2[i] = ek_speed2[i-1];
+    uk_speed2[i] = uk_speed2[i-1];
+  }
+
+  // calculate new tracking error
+  ek_speed1[0] = speed1_des - speed1_act;
+  ek_speed2[0] = speed2_des - speed2_act; 
+
+  // compute the new voltages to be sent to the motors
+  uk_speed1[0] = 1/(den_contr_speed1[0]) * (-den_contr_speed1[1]*uk_speed1[1] + num_contr_speed1[0]*ek_speed1[0] + num_contr_speed1[1]*ek_speed1[1]);
+  uk_speed2[0] = 1/(den_contr_speed2[0]) * (-den_contr_speed2[1]*uk_speed2[1] + num_contr_speed2[0]*ek_speed2[0] + num_contr_speed2[1]*ek_speed2[1]); 
+
+  // clip output of the controllers to allowed voltages
+  if(uk_speed1[0] > 6000) { uk_speed1[0] = 6000; }
+  if(uk_speed1[0] < -6000) { uk_speed1[0] = -6000; }
+  if(uk_speed2[0] > 6000) { uk_speed2[0] = 6000; }
+  if(uk_speed2[0] < -6000) { uk_speed2[0] = -6000; }
+
+  // drive the motors with the calculated values
+  _motor1->setBridgeVoltage((int)uk_speed1[0]);
+  _motor2->setBridgeVoltage((int)uk_speed2[0]);
+  
+}
+
+void Robot::reset_controller()
+{
+    // loop over indices 0-2 to set all registers to zero
+    for(int k=0;k<2;k++){
+        ek_speed1[k] = 0.0;
+        uk_speed1[k] = 0.0;
+        ek_speed2[k] = 0.0;
+        uk_speed2[k] = 0.0;
+    }
+}
+
 
 void Robot::random_excitation(int period)
 {
@@ -120,10 +136,10 @@ void Robot::random_excitation(int period)
 void Robot::ramp_input()
 {
 
-  if (V_ramp > -6000)
+  if (counter > -6000)
   {
-    V_ramp = V_ramp - 1;
-    float V_motor = min(-3000, V_ramp);
+    counter = counter - 1;
+    float V_motor = min(-3000, counter);
 
     System.setGPoutInt(2 , V_motor);
     _motor1 -> setBridgeVoltage(V_motor);
@@ -140,13 +156,13 @@ void Robot::ramp_input()
 void Robot::step_input()
 {
   float V_motor = 0;
-  if (V_ramp > 1000)
+  if (counter > 1000)
   {
     V_motor = -6000;
   }
   else 
   { 
-  V_ramp = V_ramp + 1;
+    counter = counter + 1;
   }
 
   System.setGPoutInt(2 , V_motor);

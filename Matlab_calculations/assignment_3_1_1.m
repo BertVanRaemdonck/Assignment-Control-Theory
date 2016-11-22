@@ -1,7 +1,11 @@
-close all
-clear all
-clc
-clear
+if ~ exist('show_figures', 'var')
+    close all
+    clear all
+    clc
+    clear
+    show_figures = 1;   % show_figures can be set to 0 in another file to suppress the figures in this code
+end
+
 
 %% Parameters
 fs = 100;   % Hz
@@ -55,19 +59,21 @@ enc2 = average_filter(enc2,period);
 t = t(1:length(v));
 
 % Plot the data
-figure('name', 'Raw input data')
-subplot(3,1,1)
-plot(t, v);
-xlabel('t [ms]')
-ylabel('v [mV]')
-subplot(3,1,2)
-plot(t, enc1);
-xlabel('t [ms]')
-ylabel('value encoder 1')
-subplot(3,1,3)
-plot(t, enc2);
-xlabel('t [ms]')
-ylabel('value encoder 2')
+if show_figures == 1
+    figure('name', 'Raw input data')
+    subplot(3,1,1)
+    plot(t, v);
+    xlabel('t [ms]')
+    ylabel('v [mV]')
+    subplot(3,1,2)
+    plot(t, enc1);
+    xlabel('t [ms]')
+    ylabel('value encoder 1')
+    subplot(3,1,3)
+    plot(t, enc2);
+    xlabel('t [ms]')
+    ylabel('value encoder 2')
+end
 
 
 %% Calculating speeds
@@ -83,19 +89,21 @@ if (0 < butter_cutoff) && (butter_cutoff < 1)
     enc2_v = filter(B_filt, A_filt, enc2_v-enc2_v(1)) + enc2_v(1);
 end
 
-figure('name', 'Processed input data')
-subplot(3,1,1)
-plot(t, v);
-xlabel('t [ms]')
-ylabel('v [mV]')
-subplot(3,1,2)
-plot(t, enc1_v);             
-xlabel('t [ms]')
-ylabel('speed encoder 1')
-subplot(3,1,3)
-plot(t, enc2_v);             
-xlabel('t [ms]')
-ylabel('speed encoder 2')
+if show_figures == 1
+    figure('name', 'Processed input data')
+    subplot(3,1,1)
+    plot(t, v);
+    xlabel('t [ms]')
+    ylabel('v [mV]')
+    subplot(3,1,2)
+    plot(t, enc1_v);             
+    xlabel('t [ms]')
+    ylabel('speed encoder 1')
+    subplot(3,1,3)
+    plot(t, enc2_v);             
+    xlabel('t [ms]')
+    ylabel('speed encoder 2')
+end
 
 %% Converting to frequency domain
 
@@ -105,33 +113,35 @@ v_f = fftshift(fft(v,nb_freqs))/nb_freqs;
 enc1_v_f = fftshift(fft(enc1_v,nb_freqs))/nb_freqs;
 enc2_v_f = fftshift(fft(enc2_v,nb_freqs))/nb_freqs;
 
-figure('name', 'Input data in the frequency domain')
-subplot(3,2,1)
-plot(f, abs(v_f))
-xlabel('f [Hz]')
-ylabel('|v|')
-subplot(3,2,2)
-plot(f, 180/pi*unwrap(angle(v_f)))
-xlabel('f [Hz]')
-ylabel('\anglev [°]')
+if show_figures == 1
+    figure('name', 'Input data in the frequency domain')
+    subplot(3,2,1)
+    plot(f, abs(v_f))
+    xlabel('f [Hz]')
+    ylabel('|v|')
+    subplot(3,2,2)
+    plot(f, 180/pi*unwrap(angle(v_f)))
+    xlabel('f [Hz]')
+    ylabel('\anglev [°]')
 
-subplot(3,2,3)
-plot(f, abs(enc1_v_f))
-xlabel('f [Hz]')
-ylabel('|enc1|')
-subplot(3,2,4)
-plot(f, 180/pi*unwrap(angle(enc1_v_f)))
-xlabel('f [Hz]')
-ylabel('\angleenc1 [°]')
+    subplot(3,2,3)
+    plot(f, abs(enc1_v_f))
+    xlabel('f [Hz]')
+    ylabel('|enc1|')
+    subplot(3,2,4)
+    plot(f, 180/pi*unwrap(angle(enc1_v_f)))
+    xlabel('f [Hz]')
+    ylabel('\angleenc1 [°]')
 
-subplot(3,2,5)
-plot(f, abs(enc2_v_f))
-xlabel('f [Hz]')
-ylabel('|enc2|')
-subplot(3,2,6)
-plot(f, 180/pi*unwrap(angle(enc2_v_f)))
-xlabel('f [Hz]')
-ylabel('\angleenc2 [°]')
+    subplot(3,2,5)
+    plot(f, abs(enc2_v_f))
+    xlabel('f [Hz]')
+    ylabel('|enc2|')
+    subplot(3,2,6)
+    plot(f, 180/pi*unwrap(angle(enc2_v_f)))
+    xlabel('f [Hz]')
+    ylabel('\angleenc2 [°]')
+end
 
 
 %% Finding least squares solution
@@ -148,53 +158,57 @@ zeros_enc1 = zero(sys_enc1)
 zeros_enc2 = zero(sys_enc2)
 
 % plotting bodeplots
-figure('name','Bodeplots calculated systems')
-subplot(2,1,1)
-bode(sys_enc1)
-grid on
-title('Bodeplot encoder 1')
-subplot(2,1,2)
-bode(sys_enc2)
-grid on
-title('Bodeplot encoder2')
+if show_figures == 1
+    figure('name','Bodeplots calculated systems')
+    subplot(2,1,1)
+    bode(sys_enc1)
+    grid on
+    title('Bodeplot encoder 1')
+    subplot(2,1,2)
+    bode(sys_enc2)
+    grid on
+    title('Bodeplot encoder2')
+end
 
 %% Checking least squares approximation in frequency domain
 
 FRF_enc1 = freqz(num_enc1, den_enc1, f, fs);
 FRF_enc2 = freqz(num_enc2, den_enc2, f, fs);
 
-figure('name','Comparison bode plots')
-subplot(2,2,1)
-semilogx(f, 20*log10(abs(enc1_v_f./v_f)), f, 20*log10(abs(FRF_enc1)), '--', 'LineWidth', 1)
-grid on
-axis tight
-xlabel('f  [Hz]')
-ylabel('|FRF|  [dB]')
-legend('emp', 'est')
-title('encoder 1')
-subplot(2,2,3)
-semilogx(f, 180/pi*unwrap(angle(enc1_v_f./v_f)), f, 180/pi*unwrap(angle(FRF_enc1)), '--', 'LineWidth', 1)
-grid on
-axis tight
-xlabel('f  [Hz]')
-ylabel('\phi(FRF)  [^\circ]')
-legend('emp', 'est')
+if show_figures == 1
+    figure('name','Comparison bode plots')
+    subplot(2,2,1)
+    semilogx(f, 20*log10(abs(enc1_v_f./v_f)), f, 20*log10(abs(FRF_enc1)), '--', 'LineWidth', 1)
+    grid on
+    axis tight
+    xlabel('f  [Hz]')
+    ylabel('|FRF|  [dB]')
+    legend('emp', 'est')
+    title('encoder 1')
+    subplot(2,2,3)
+    semilogx(f, 180/pi*unwrap(angle(enc1_v_f./v_f)), f, 180/pi*unwrap(angle(FRF_enc1)), '--', 'LineWidth', 1)
+    grid on
+    axis tight
+    xlabel('f  [Hz]')
+    ylabel('\phi(FRF)  [^\circ]')
+    legend('emp', 'est')
 
-subplot(2,2,2)
-semilogx(f, 20*log10(abs(enc2_v_f./v_f)), f, 20*log10(abs(FRF_enc2)), '--', 'LineWidth', 1)
-grid on
-axis tight
-xlabel('f  [Hz]')
-ylabel('|FRF|  [dB]')
-legend('emp', 'est')
-title('encoder 2')
-subplot(2,2,4)
-semilogx(f, 180/pi*unwrap(angle(enc2_v_f./v_f)), f, 180/pi*unwrap(angle(FRF_enc2)), '--', 'LineWidth', 1)
-grid on
-axis tight
-xlabel('f  [Hz]')
-ylabel('\phi(FRF)  [^\circ]')
-legend('emp', 'est')
+    subplot(2,2,2)
+    semilogx(f, 20*log10(abs(enc2_v_f./v_f)), f, 20*log10(abs(FRF_enc2)), '--', 'LineWidth', 1)
+    grid on
+    axis tight
+    xlabel('f  [Hz]')
+    ylabel('|FRF|  [dB]')
+    legend('emp', 'est')
+    title('encoder 2')
+    subplot(2,2,4)
+    semilogx(f, 180/pi*unwrap(angle(enc2_v_f./v_f)), f, 180/pi*unwrap(angle(FRF_enc2)), '--', 'LineWidth', 1)
+    grid on
+    axis tight
+    xlabel('f  [Hz]')
+    ylabel('\phi(FRF)  [^\circ]')
+    legend('emp', 'est')
+end
 
 %% Checking least squares approximation in time domain
 sys_enc1_ss = ss(sys_enc1); % state space equivalent of the system, needed to set initial conditions for lsim correctly, see https://nl.mathworks.com/matlabcentral/answers/99019-how-can-i-set-the-initial-value-for-the-output-y-1-when-using-the-lsim-function-in-control-syst
@@ -203,27 +217,29 @@ sys_enc2_ss = ss(sys_enc2);
 enc1_v_est = lsim(sys_enc1_ss, v, t, [0;enc1_v(1)/sys_enc1_ss.C(end)], '--');
 enc2_v_est = lsim(sys_enc2_ss, v, t, [0;enc2_v(1)/sys_enc2_ss.C(end)], '--');
 
-figure('name','Comparison time response')
-subplot(2,1,1)
-plot(t,enc1_v)
-hold on
-plot(t,enc1_v_est,'--')
-xlabel('t [s]')
-ylabel('speed [?]')
-legend('emp','est')
-title('encoder 1')
-hold off
+if show_figures == 1
+    figure('name','Comparison time response')
+    subplot(2,1,1)
+    plot(t,enc1_v)
+    hold on
+    plot(t,enc1_v_est,'--')
+    xlabel('t [s]')
+    ylabel('speed [?]')
+    legend('emp','est')
+    title('encoder 1')
+    hold off
 
-subplot(2,1,2)
-plot(t,enc2_v)
-hold on
-plot(t,enc2_v_est,'--')
-xlabel('t [s]')
-ylabel('speed [?]')
-legend('emp','est')
-title('encoder 2')
-hold off
-
+    subplot(2,1,2)
+    plot(t,enc2_v)
+    hold on
+    plot(t,enc2_v_est,'--')
+    xlabel('t [s]')
+    ylabel('speed [?]')
+    legend('emp','est')
+    title('encoder 2')
+    hold off
+end
+    
 
 %% Checking model for other input
 % Cleaning and viewing data
@@ -284,26 +300,30 @@ enc22_speed = enc22_speed + enc22_speed1;          % compensate back for setting
 time2=0:Ts:(length(v2)-1)*Ts;
 y2_enc1 = lsim(sys_enc1,v2,time2,'--');    
 
-figure('name','lsim encoder 1 input 2')
-plot(time2,enc12_speed)
-hold on
-plot(time2,y2_enc1,'--')
-xlabel('t [s]')
-ylabel('speed [?]')
-legend('emp','est')
-hold off
+if show_figures == 1
+    figure('name','lsim encoder 1 input 2')
+    plot(time2,enc12_speed)
+    hold on
+    plot(time2,y2_enc1,'--')
+    xlabel('t [s]')
+    ylabel('speed [?]')
+    legend('emp','est')
+    hold off
+end
 
 % Time simulation of system encoder 2 input 2
 y2_enc2 = lsim(sys_enc2,v2,time2,'--');     
 
-figure('name','lsim encoder 2 input 2')
-plot(time2,enc22_speed)
-hold on
-plot(time2,y2_enc2,'--')
-xlabel('t [s]')
-ylabel('speed [?]')
-legend('emp','est')
-hold off
+if show_figures == 1
+    figure('name','lsim encoder 2 input 2')
+    plot(time2,enc22_speed)
+    hold on
+    plot(time2,y2_enc2,'--')
+    xlabel('t [s]')
+    ylabel('speed [?]')
+    legend('emp','est')
+    hold off
+end
 
 
 
