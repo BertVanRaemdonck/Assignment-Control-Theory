@@ -43,6 +43,16 @@ void Robot::controllerHook(){
   
 	if(controlEnabled()){
 		//write the control in here
+   float speed2_des_c = System.getGPinFloat(0);
+   int enc1_curr = _encoder1 ->readRawValue();
+   int enc2_curr = _encoder2 ->readRawValue();
+   
+   controller_speed(0, speed2_des_c);
+   
+   System.setGPoutFloat(0, speed2_des_c);
+   System.setGPoutFloat(1 ,(enc2_curr-enc2_prev)/Ts);
+   enc1_prev = enc1_curr;
+   enc2_prev = enc2_curr;
     
 	} else {
 		//set motor voltage to zero or it will keep on running...
@@ -53,18 +63,22 @@ void Robot::controllerHook(){
 	}
 }
 
-void Robot::controller_speed(int speed1_des, int speed2_des)
+void Robot::controller_speed(float speed1_des, float speed2_des)
 {
   // read encoder values
   int enc1 = _encoder1 ->readRawValue();
   int enc2 = _encoder2 ->readRawValue();
+
+  // unwrap encoder values
+  enc1 = unwrap(enc1, enc1_prev);
+  enc2 = unwrap(enc2, enc2_prev);  
 
   // calculate new speed
   float speed1_act = (enc1 - enc1_prev)/Ts;
   float speed2_act = (enc2 - enc2_prev)/Ts;
 
   // shift memories
-  for(int i = 2; i > 0; i--){
+  for(int i = 1; i > 0; i--){
     ek_speed1[i] = ek_speed1[i-1];
     uk_speed1[i] = uk_speed1[i-1];
     ek_speed2[i] = ek_speed2[i-1];
@@ -85,10 +99,23 @@ void Robot::controller_speed(int speed1_des, int speed2_des)
   if(uk_speed2[0] > 6000) { uk_speed2[0] = 6000; }
   if(uk_speed2[0] < -6000) { uk_speed2[0] = -6000; }
 
+  System.setGPoutFloat(2 ,uk_speed2[0]);
+
   // drive the motors with the calculated values
   _motor1->setBridgeVoltage((int)uk_speed1[0]);
   _motor2->setBridgeVoltage((int)uk_speed2[0]);
   
+}
+
+int Robot::unwrap(int curr_val, int prev_val){
+  // unwraps two succeeding values
+  if (curr_val - prev_val > 32768){
+    curr_val = curr_val - 65536;
+  }
+  else if (curr_val - prev_val < -32768){
+    curr_val = curr_val + 65536;
+  }
+  return curr_val;
 }
 
 void Robot::reset_controller()

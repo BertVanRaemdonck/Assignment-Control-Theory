@@ -44,8 +44,8 @@ private:
   float Ts = 0.01;
   
   // Memory of the speed controller
-  float enc1_prev = 0.0;
-  float enc2_prev = 0.0;
+  int enc1_prev = 0;
+  int enc2_prev = 0;
   
   float ek_speed1[2] = {0.0, 0.0};
   float uk_speed1[2] = {0.0, 0.0};
@@ -54,10 +54,10 @@ private:
   float uk_speed2[2] = {0.0, 0.0};
 
   // Parameters of the speed controller
-  float num_contr_speed1[2] = {9.0028, -5.3379};
+  float num_contr_speed1[2] = {1.8319, -1.2435};
   float den_contr_speed1[2] = {1.0, -1.0}; 
 
-  float num_contr_speed2[2] = {12.2425, -9.2241};
+  float num_contr_speed2[2] = {1.8319, -1.2435};
   float den_contr_speed2[2] = {1.0, -1.0};
 
 
@@ -77,8 +77,9 @@ public:
   void ramp_input();
   void step_input();
   void block_input(float = 500);
-  void controller_speed(int, int);
+  void controller_speed(float, float);
   void reset_controller();
+  int unwrap(int, int);
 
 	///////
 	/// GET

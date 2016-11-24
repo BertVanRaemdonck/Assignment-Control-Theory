@@ -25,9 +25,9 @@ speed_ref = [speed_ref  (mag_speed_ref/2)*ones([1,nb_speed_ref/3])];
 speed_ref = [speed_ref  (mag_speed_ref/1)*ones([1,nb_speed_ref/3])];
 
 PM1 = 55;           % desired phase marge of controller 1
-omega_co1 = 30;     % desired crossover frequency in rad/s
+omega_co1 = 10;     % desired crossover frequency in rad/s
 PM2 = 55;           % desired phase marge of controller 2
-omega_co2 = 30;     % desired crossover frequency in rad/s
+omega_co2 = 10;     % desired crossover frequency in rad/s
 
 % Taking data from assignment_3_1_1.m
 num_enc1_or = num_enc1;
@@ -160,3 +160,51 @@ hold off
 
 sys_PI1_d = c2d(sys_PI1, Ts, 'zoh');
 sys_PI2_d = c2d(sys_PI2, Ts, 'zoh');
+
+
+%% Custom simulation of time response of compensated system
+
+t = 0:Ts:30;          % [s]
+ek_speed1 = [0.0, 0.0];
+uk_speed1 = [0.0, 0.0];
+
+ek = [zeros(1, round(length(t)/3)), -100*ones(1, length(t)-round(length(t)/3))];
+uk = zeros(size(ek));
+
+den_contr_speed1 = cell2mat(sys_PI1_d.den);
+num_contr_speed1 = cell2mat(sys_PI2_d.num);
+
+for i = 1:length(ek)
+    % shift memories
+    j = 1;
+    while j > 0
+        ek_speed1(j+1) = ek_speed1(j+1-1);   % the j+1 is there because c++ starts from 0 but matlab from 1
+        uk_speed1(j+1) = uk_speed1(j+1-1);
+        j = j-1;
+    end
+    ek_speed1(1) = ek(i);
+    
+    % compute new voltage
+    uk_speed1(0+1) = 1/(den_contr_speed1(0+1)) * ...
+                     (-den_contr_speed1(1+1)*uk_speed1(1+1) + ...
+                     num_contr_speed1(0+1)*ek_speed1(0+1) + ...
+                     num_contr_speed1(1+1)*ek_speed1(1+1));
+    
+    % clip output of the controllers
+    if uk_speed1(0+1) > 6000
+        uk_speed1(0+1) = 6000;
+    end
+    if uk_speed1(0+1) < -6000
+        uk_speed1(0+1) = -6000;
+    end
+    
+    % put control signal in vector for viewing
+    uk(i) = uk_speed1(1);
+    
+end
+
+figure()
+plot(t, ek)
+hold on
+plot(t, uk)
+hold off
