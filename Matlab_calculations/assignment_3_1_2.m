@@ -25,9 +25,9 @@ speed_ref = [speed_ref  (mag_speed_ref/2)*ones([1,nb_speed_ref/3])];
 speed_ref = [speed_ref  (mag_speed_ref/1)*ones([1,nb_speed_ref/3])];
 
 PM1 = 55;           % desired phase marge of controller 1
-omega_co1 = 10;     % desired crossover frequency in rad/s
+omega_co1 = 15;     % desired crossover frequency in rad/s -> higher than this won't decrease tr much because saturation
 PM2 = 55;           % desired phase marge of controller 2
-omega_co2 = 10;     % desired crossover frequency in rad/s
+omega_co2 = 15;     % desired crossover frequency in rad/s
 
 % Taking data from assignment_3_1_1.m
 num_enc1_or = num_enc1;

@@ -54,10 +54,10 @@ private:
   float uk_speed2[2] = {0.0, 0.0};
 
   // Parameters of the speed controller
-  float num_contr_speed1[2] = {1.8319, -1.2435};
+  float num_contr_speed1[2] = {3.5460, -2.3770};
   float den_contr_speed1[2] = {1.0, -1.0}; 
 
-  float num_contr_speed2[2] = {1.8319, -1.2435};
+  float num_contr_speed2[2] = {4.1780, -3.1331};
   float den_contr_speed2[2] = {1.0, -1.0};
 
 
@@ -76,7 +76,8 @@ public:
   void random_excitation(int = 0);
   void ramp_input();
   void step_input();
-  void block_input(float = 500);
+  float block_input_reference(float=500, float=1000, float=2000);
+  void block_input_excitation(float = 500);
   void controller_speed(float, float);
   void reset_controller();
   int unwrap(int, int);

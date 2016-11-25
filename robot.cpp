@@ -43,16 +43,21 @@ void Robot::controllerHook(){
   
 	if(controlEnabled()){
 		//write the control in here
-   float speed2_des_c = System.getGPinFloat(0);
+   float speed1_des = System.getGPinFloat(0);
+   float speed2_des = System.getGPinFloat(1);
    int enc1_curr = _encoder1 ->readRawValue();
    int enc2_curr = _encoder2 ->readRawValue();
    
-   controller_speed(0, speed2_des_c);
+   controller_speed(speed1_des, speed2_des);
    
-   System.setGPoutFloat(0, speed2_des_c);
-   System.setGPoutFloat(1 ,(enc2_curr-enc2_prev)/Ts);
+   System.setGPoutFloat(0, speed1_des);
+   System.setGPoutFloat(1,(enc1_curr-enc1_prev)/Ts);
+   System.setGPoutFloat(4, speed2_des);
+   System.setGPoutFloat(5, (enc2_curr-enc2_prev)/Ts);
    enc1_prev = enc1_curr;
    enc2_prev = enc2_curr;
+
+   System.setGPoutInt(0, enc1_curr - enc2_curr);
     
 	} else {
 		//set motor voltage to zero or it will keep on running...
@@ -60,6 +65,7 @@ void Robot::controllerHook(){
     _motor2 -> setBridgeVoltage(0); // set motor2 voltage to 0V
     // reset controller so that it does not do crazy things when we restart it
     reset_controller();
+    counter = 0.0;
 	}
 }
 
@@ -99,7 +105,9 @@ void Robot::controller_speed(float speed1_des, float speed2_des)
   if(uk_speed2[0] > 6000) { uk_speed2[0] = 6000; }
   if(uk_speed2[0] < -6000) { uk_speed2[0] = -6000; }
 
-  System.setGPoutFloat(2 ,uk_speed2[0]);
+  // show control signal
+  System.setGPoutFloat(2, uk_speed1[0]);
+  System.setGPoutFloat(6, uk_speed2[0]);
 
   // drive the motors with the calculated values
   _motor1->setBridgeVoltage((int)uk_speed1[0]);
@@ -203,8 +211,33 @@ void Robot::step_input()
   System.setGPoutInt(1, enc2_value);
 }
 
+float Robot::block_input_reference(float width_block, float val_low, float val_high)
+{
+  /*
+   * Returns a float following a block signal every time it's called. The block starts
+   * on val_low and goes to val_high, and has a width of width_block. The signal is
+   * periodical
+   */
+   float ref;
+   if (counter < width_block)
+   {
+    ref = val_low;
+   }
+   else if (counter >= width_block)
+   {
+    ref = val_high;
+   }
+   counter += 1;
 
-void Robot::block_input(float breedte_blokpuls)
+   if (counter >= 2*width_block)
+   {
+    counter = 0.0;
+   }
+
+   return ref;
+}
+
+void Robot::block_input_excitation(float breedte_blokpuls)
 {
   
   if (counter < breedte_blokpuls)
