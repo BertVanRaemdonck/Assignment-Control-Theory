@@ -3,8 +3,16 @@ clear all
 clc
 clear
 
+if ~ exist('show_figures2', 'var')
+    close all
+    clear all
+    clc
+    clear
+    show_figures2 = 1;   % show_figures2 can be set to 0 in another file to suppress the figures in this code
+end
+
 %% Assignment_3_1_1.m opvragen
-show_figures = 0;   % assignment_3_1_1 doesn't display its figures so works a bit faster
+show_figures = 0;   % assignment_3_1_1 doesn't display its figures, if set to zero, so works a bit faster
 assignment_3_1_1
 
 
@@ -41,15 +49,17 @@ sys_enc2_or = tf(num_enc2_or,den_enc2_or,Ts);
 sys_enc1_c = d2c(sys_enc1_or);    % We have to work in continuous time
 sys_enc2_c = d2c(sys_enc2_or);
 
-figure('name','Bodeplot of encoders without PI in discrete and continuous time')
-subplot(2,1,1)
-bode(sys_enc1_or, sys_enc1_c),grid
-legend('enc1 disc', 'enc1 cont')
-title('Bode diagram for encoder 1')
-subplot(2,1,2)
-bode(sys_enc2_or, sys_enc2_c),grid
-legend('enc2 disc', 'enc2 cont')
-title('Bode diagram for encoder 2')
+if show_figures2 == 1
+    figure('name','Bodeplot of encoders without PI in discrete and continuous time')
+    subplot(2,1,1)
+    bode(sys_enc1_or, sys_enc1_c),grid
+    legend('enc1 disc', 'enc1 cont')
+    title('Bode diagram for encoder 1')
+    subplot(2,1,2)
+    bode(sys_enc2_or, sys_enc2_c),grid
+    legend('enc2 disc', 'enc2 cont')
+    title('Bode diagram for encoder 2')
+end
 
 % calculating magnitude and phase for needed calculations
 w = logspace(low_exp_w,high_exp_w,number_points_w);
@@ -78,13 +88,15 @@ den_PI2 = [T_i2 0];
 sys_PI1 = tf(num_PI1, den_PI1);   
 sys_PI2 = tf(num_PI2, den_PI2);  
 
-figure('name', 'Bodeplot of the PI compensators')
-subplot(2,1,1)
-bode(sys_PI1, w), grid
-title('Bode diagram PI for encoder 1')
-subplot(2,1,2)
-bode(sys_PI1, w), grid
-title('Bode diagram PI for encoder 2')
+if show_figures2 == 1
+    figure('name', 'Bodeplot of the PI compensators')
+    subplot(2,1,1)
+    bode(sys_PI1, w), grid
+    title('Bode diagram PI for encoder 1')
+    subplot(2,1,2)
+    bode(sys_PI1, w), grid
+    title('Bode diagram PI for encoder 2')
+end
 
 %% Viewing compensated systems
 
@@ -94,25 +106,27 @@ sys_enc1_PIcomp_d = c2d(sys_enc1_PIcomp_c,Ts);      % We work in discrete time
 sys_enc2_PIcomp_c = series(sys_PI2, sys_enc2_c);
 sys_enc2_PIcomp_d = c2d(sys_enc2_PIcomp_c,Ts);
 
-figure('name', 'Bodeplot of the compensated systems in continuous time')
-subplot(2,1,1)
-bode(sys_enc1_c, sys_enc1_PIcomp_c, w), grid
-title('Bode diagram for the compensated encoder 1')
-legend('enc1', 'enc1_PIcomp')
-subplot(2,1,2)
-bode(sys_enc2_c, sys_enc2_PIcomp_c, w), grid
-title('Bode diagram for the compensated encoder 2')
-legend('enc2', 'enc2_PIcomp')
+if show_figures2 == 1
+    figure('name', 'Bodeplot of the compensated systems in continuous time')
+    subplot(2,1,1)
+    bode(sys_enc1_c, sys_enc1_PIcomp_c, w), grid
+    title('Bode diagram for the compensated encoder 1')
+    legend('enc1', 'enc1_PIcomp')
+    subplot(2,1,2)
+    bode(sys_enc2_c, sys_enc2_PIcomp_c, w), grid
+    title('Bode diagram for the compensated encoder 2')
+    legend('enc2', 'enc2_PIcomp')
 
-figure('name', 'Bodeplot of the compensated systems in discrete time')
-subplot(2,1,1)
-bode(sys_enc1_or, sys_enc1_PIcomp_d, w), grid
-legend('enc1', 'enc1_PIcomp')
-title('Bode diagram for the compensated encoder 1')
-subplot(2,1,2)
-bode(sys_enc2_or, sys_enc2_PIcomp_d, w), grid
-legend('enc2', 'enc2_PIcomp')
-title('Bode diagram for the compensated encoder 2')
+    figure('name', 'Bodeplot of the compensated systems in discrete time')
+    subplot(2,1,1)
+    bode(sys_enc1_or, sys_enc1_PIcomp_d, w), grid
+    legend('enc1', 'enc1_PIcomp')
+    title('Bode diagram for the compensated encoder 1')
+    subplot(2,1,2)
+    bode(sys_enc2_or, sys_enc2_PIcomp_d, w), grid
+    legend('enc2', 'enc2_PIcomp')
+    title('Bode diagram for the compensated encoder 2')
+end
 
 
 %% Testing controller with simulations
@@ -132,29 +146,31 @@ y1_enc1_PIcomp_fb = lsim(sys_enc1_PIcomp_fb,speed_ref,time_fb,'--');
 y1_enc2_or_fb = lsim(sys_enc2_or_fb,speed_ref,time_fb);
 y1_enc2_PIcomp_fb = lsim(sys_enc2_PIcomp_fb,speed_ref,time_fb,'--');    
 
-figure('name','lsim encoders with feedback loop')
-subplot(2,1,1)
-plot(time_fb,speed_ref)
-hold on
-plot(time_fb,y1_enc1_or_fb,':')
-hold on
-plot(time_fb,y1_enc1_PIcomp_fb,'--')
-xlabel('t [s]')
-ylabel('speed [?]')
-legend('reference input','without controller','with controller')
-title('encoder 1')
-hold off
-subplot(2,1,2)
-plot(time_fb,speed_ref)
-hold on
-plot(time_fb,y1_enc2_or_fb,':')
-hold on
-plot(time_fb,y1_enc2_PIcomp_fb,'--')
-xlabel('t [s]')
-ylabel('speed [?]')
-legend('reference input','without controller','with controller')
-title('encoder 2')
-hold off
+if show_figures2 == 1
+    figure('name','lsim encoders with feedback loop')
+    subplot(2,1,1)
+    plot(time_fb,speed_ref)
+    hold on
+    plot(time_fb,y1_enc1_or_fb,':')
+    hold on
+    plot(time_fb,y1_enc1_PIcomp_fb,'--')
+    xlabel('t [s]')
+    ylabel('speed [?]')
+    legend('reference input','without controller','with controller')
+    title('encoder 1')
+    hold off
+    subplot(2,1,2)
+    plot(time_fb,speed_ref)
+    hold on
+    plot(time_fb,y1_enc2_or_fb,':')
+    hold on
+    plot(time_fb,y1_enc2_PIcomp_fb,'--')
+    xlabel('t [s]')
+    ylabel('speed [?]')
+    legend('reference input','without controller','with controller')
+    title('encoder 2')
+    hold off
+end
 
 %% Data needed to implement controller
 % This is represented in Arduino file robot.h by 
@@ -205,11 +221,13 @@ for i = 1:length(ek)
     
 end
 
-figure()
-plot(t, ek)
-hold on
-plot(t, uk)
-hold off
+if show_figures2 == 1
+    figure()
+    plot(t, ek)
+    hold on
+    plot(t, uk)
+    hold off
+end
 
 
 %% Comparison simulation of speed motors with actual response
@@ -264,79 +282,83 @@ speed2_PIcomp_fb = lsim(sys_enc2_PIcomp_fb,speed2_des,t,':');
 
 
 % Plotting data speed motor 1
-figure('name', 'Comparison speed motor 1')
-subplot(2,2,1)
-plot(t, speed1_des);
-hold on
-plot(t, speed1_act,'--');
-hold off
-xlabel('t [s]')
-ylabel('speed [?]')
-axis([t_start t_stop -inf inf]);
-legend('desired speed','actual speed','location','northwest')
-title('speed comparison of motor 1')
-subplot(2,2,2)
-plot(t, speed1_des);
-hold on
-plot(t, speed1_PIcomp_fb,'--');
-hold off
-xlabel('t [s]')
-ylabel('speed [?]')
-axis([t_start t_stop -inf inf]);
-legend('desired speed','simulated speed','location','northwest')
-title('speed comparison of motor 1')
-subplot(2,2,3)
-plot(t, speed1_act-speed1_des);
-hold on
-plot(t, speed1_PIcomp_fb-speed1_des,'--');
-hold off
-xlabel('t [s]')
-ylabel('\Deltaspeed [?]')
-axis([t_start t_stop -inf inf]);
-legend('error actual','error simulated')
-title('error between speed and desired speed')
-subplot(2,2,4)
-plot(t, control_signal1);
-xlabel('t [s]')
-ylabel('control signal 1 [mV]')
-axis([t_start t_stop -inf inf]);
-title('control signal of motor 1')
+if show_figures2 == 1
+    figure('name', 'Comparison speed motor 1')
+    subplot(2,2,1)
+    plot(t, speed1_des);
+    hold on
+    plot(t, speed1_act,'--');
+    hold off
+    xlabel('t [s]')
+    ylabel('speed [?]')
+    axis([t_start t_stop -inf inf]);
+    legend('desired speed','actual speed','location','northwest')
+    title('speed comparison of motor 1')
+    subplot(2,2,2)
+    plot(t, speed1_des);
+    hold on
+    plot(t, speed1_PIcomp_fb,'--');
+    hold off
+    xlabel('t [s]')
+    ylabel('speed [?]')
+    axis([t_start t_stop -inf inf]);
+    legend('desired speed','simulated speed','location','northwest')
+    title('speed comparison of motor 1')
+    subplot(2,2,3)
+    plot(t, speed1_act-speed1_des);
+    hold on
+    plot(t, speed1_PIcomp_fb-speed1_des,'--');
+    hold off
+    xlabel('t [s]')
+    ylabel('\Deltaspeed [?]')
+    axis([t_start t_stop -inf inf]);
+    legend('error actual','error simulated')
+    title('error between speed and desired speed')
+    subplot(2,2,4)
+    plot(t, control_signal1);
+    xlabel('t [s]')
+    ylabel('control signal 1 [mV]')
+    axis([t_start t_stop -inf inf]);
+    title('control signal of motor 1')
+end
 
 % Plotting data speed motor 2
-figure('name', 'Comparison speed motor 2')
-subplot(2,2,1)
-plot(t, speed2_des);
-hold on
-plot(t, speed2_act,'--');
-hold off
-xlabel('t [s]')
-ylabel('speed [?]')
-axis([t_start t_stop -inf inf]);
-legend('desired speed','actual speed','location','northwest')
-title('speed comparison of motor 2')
-subplot(2,2,2)
-plot(t, speed2_des);
-hold on
-plot(t, speed2_PIcomp_fb,'--');
-hold off
-xlabel('t [s]')
-ylabel('speed [?]')
-axis([t_start t_stop -inf inf]);
-legend('desired speed','simulated speed','location','northwest')
-title('speed comparison of motor 2')
-subplot(2,2,3)
-plot(t, speed2_act-speed2_des);
-hold on
-plot(t, speed2_PIcomp_fb-speed2_des,'--');
-hold off
-xlabel('t [s]')
-ylabel('\Deltaspeed [?]')
-axis([t_start t_stop -inf inf]);
-legend('error actual','error simulated')
-title('error between speed and desired speed')
-subplot(2,2,4)
-plot(t, control_signal2);
-xlabel('t [s]')
-ylabel('control signal 2 [mV]')
-axis([t_start t_stop -inf inf]);
-title('control signal of motor 2')
+if show_figures2 == 1
+    figure('name', 'Comparison speed motor 2')
+    subplot(2,2,1)
+    plot(t, speed2_des);
+    hold on
+    plot(t, speed2_act,'--');
+    hold off
+    xlabel('t [s]')
+    ylabel('speed [?]')
+    axis([t_start t_stop -inf inf]);
+    legend('desired speed','actual speed','location','northwest')
+    title('speed comparison of motor 2')
+    subplot(2,2,2)
+    plot(t, speed2_des);
+    hold on
+    plot(t, speed2_PIcomp_fb,'--');
+    hold off
+    xlabel('t [s]')
+    ylabel('speed [?]')
+    axis([t_start t_stop -inf inf]);
+    legend('desired speed','simulated speed','location','northwest')
+    title('speed comparison of motor 2')
+    subplot(2,2,3)
+    plot(t, speed2_act-speed2_des);
+    hold on
+    plot(t, speed2_PIcomp_fb-speed2_des,'--');
+    hold off
+    xlabel('t [s]')
+    ylabel('\Deltaspeed [?]')
+    axis([t_start t_stop -inf inf]);
+    legend('error actual','error simulated')
+    title('error between speed and desired speed')
+    subplot(2,2,4)
+    plot(t, control_signal2);
+    xlabel('t [s]')
+    ylabel('control signal 2 [mV]')
+    axis([t_start t_stop -inf inf]);
+    title('control signal of motor 2')
+end
