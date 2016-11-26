@@ -20,8 +20,8 @@ number_points_w = 1000;
 
 nb_speed_ref = 300;    % number of points of vector with the reference speed it has to track
 mag_speed_ref = 4000;   % max magnitude of vector with the reference speed it has to track
-speed_ref = (mag_speed_ref/4)*ones([1,nb_speed_ref/3]);
-speed_ref = [speed_ref  (mag_speed_ref/2)*ones([1,nb_speed_ref/3])];
+speed_ref = (mag_speed_ref/4)*ones([1,nb_speed_ref/3]);     % used for the first simulations of the controller, 
+speed_ref = [speed_ref  (mag_speed_ref/2)*ones([1,nb_speed_ref/3])];    % not for comparison with the reality
 speed_ref = [speed_ref  (mag_speed_ref/1)*ones([1,nb_speed_ref/3])];
 
 PM1 = 55;           % desired phase marge of controller 1
@@ -88,8 +88,8 @@ title('Bode diagram PI for encoder 2')
 
 %% Viewing compensated systems
 
-sys_enc1_PIcomp_c = series(sys_PI1, sys_enc1_c);
-sys_enc1_PIcomp_d = c2d(sys_enc1_PIcomp_c,Ts);
+sys_enc1_PIcomp_c = series(sys_PI1, sys_enc1_c);    % Represents total system with controller
+sys_enc1_PIcomp_d = c2d(sys_enc1_PIcomp_c,Ts);      % We work in discrete time
 
 sys_enc2_PIcomp_c = series(sys_PI2, sys_enc2_c);
 sys_enc2_PIcomp_d = c2d(sys_enc2_PIcomp_c,Ts);
@@ -115,13 +115,13 @@ legend('enc2', 'enc2_PIcomp')
 title('Bode diagram for the compensated encoder 2')
 
 
-%% Testing controller
+%% Testing controller with simulations
 
 % Making feedback loop
-sys_enc1_or_fb = feedback(sys_enc1_or,1);
+sys_enc1_or_fb = feedback(sys_enc1_or,1);   % assumes perfect measurements => unity feedback
 sys_enc2_or_fb = feedback(sys_enc2_or,1);
 
-sys_enc1_PIcomp_fb = feedback(sys_enc1_PIcomp_d,1);
+sys_enc1_PIcomp_fb = feedback(sys_enc1_PIcomp_d,1); % assumes perfect measurements => unity feedback
 sys_enc2_PIcomp_fb = feedback(sys_enc2_PIcomp_d,1);
 
 % Time simulation of system encoders with controller
@@ -157,13 +157,15 @@ title('encoder 2')
 hold off
 
 %% Data needed to implement controller
-
+% This is represented in Arduino file robot.h by 
+    % num_contr_speedi = numerator of transferfunction of PI controller of motor i
+    % den_contr_speedi = denominator of transferfunction of PI controller of motor i
 sys_PI1_d = c2d(sys_PI1, Ts, 'zoh');
 sys_PI2_d = c2d(sys_PI2, Ts, 'zoh');
 
 
 %% Custom simulation of time response of compensated system
-
+% To test if the implemented code in Arduino gives logical results
 t = 0:Ts:30;          % [s]
 ek_speed1 = [0.0, 0.0];
 uk_speed1 = [0.0, 0.0];
@@ -216,7 +218,6 @@ t_start = 0 * period * 1e-3;
 t_stop = 5 * period * 1e-3;
 
 % compile file name and import data
-
 type = 'block';         % type of the signal: 'block', 'rand', ...
 period = 1000;          % period of the signal, 0 if it isn't periodical
 
@@ -297,7 +298,7 @@ title('error between speed and desired speed')
 subplot(2,2,4)
 plot(t, control_signal1);
 xlabel('t [s]')
-ylabel('control signal 1 [mV ?]')
+ylabel('control signal 1 [mV]')
 axis([t_start t_stop -inf inf]);
 title('control signal of motor 1')
 
@@ -336,6 +337,6 @@ title('error between speed and desired speed')
 subplot(2,2,4)
 plot(t, control_signal2);
 xlabel('t [s]')
-ylabel('control signal 2 [mV ?]')
+ylabel('control signal 2 [mV]')
 axis([t_start t_stop -inf inf]);
 title('control signal of motor 2')

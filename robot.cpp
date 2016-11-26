@@ -36,6 +36,9 @@ Robot::Robot(uint8_t ID):
 void Robot::init(){
 	//initialize the robot - sort of starting procedure
 	resetEncoders();
+  // reset controller so that it does not do crazy things when we restart it
+  reset_controller();
+  counter = 0.0;
 }
 
 void Robot::controllerHook(){
@@ -71,6 +74,11 @@ void Robot::controllerHook(){
 
 void Robot::controller_speed(float speed1_des, float speed2_des)
 {
+  /**
+   * This is the implemented velocity controller.
+   * This can be used to control the velocity of the motors seperatly.
+   */
+   
   // read encoder values
   int enc1 = _encoder1 ->readRawValue();
   int enc2 = _encoder2 ->readRawValue();
@@ -116,6 +124,12 @@ void Robot::controller_speed(float speed1_des, float speed2_des)
 }
 
 int Robot::unwrap(int curr_val, int prev_val){
+  /**
+   * Unwraps the values of the encoder if needed.
+   * Used to avoid sudden changes in encoder values 
+   *    due to the limited number of encoder values.
+   */
+   
   // unwraps two succeeding values
   if (curr_val - prev_val > 32768){
     curr_val = curr_val - 65536;
@@ -128,6 +142,12 @@ int Robot::unwrap(int curr_val, int prev_val){
 
 void Robot::reset_controller()
 {
+  /**
+   * Resets the controller input and output values to zero.
+   * This is to avoid weird behaviour, due to transient respons of the wrong input, 
+   *    when the controller restarts.
+   */
+   
     // loop over indices 0-2 to set all registers to zero
     for(int k=0;k<2;k++){
         ek_speed1[k] = 0.0;
@@ -142,8 +162,10 @@ void Robot::random_excitation(int period)
 {
   /**
    * Writes a periodic random voltage signal to both motors.
-   * If period = 0, the signal has no periodicity
+   * If period = 0, the signal has no periodicity.
+   * Used for the identification of the motors.
    */
+   
   if (period > 0)
   {
     if (counter >= period)
@@ -170,7 +192,11 @@ void Robot::random_excitation(int period)
 
 void Robot::ramp_input()
 {
-
+  /**
+   * Writes a ramp voltage signal to both motors.
+   * Used for the identification of the motors.
+   */
+   
   if (counter > -6000)
   {
     counter = counter - 1;
@@ -190,6 +216,11 @@ void Robot::ramp_input()
 
 void Robot::step_input()
 {
+  /**
+   * Writes a step voltage signal to both motors.
+   * Used for the identification of the motors.
+   */
+  
   float V_motor = 0;
   if (counter > 1000)
   {
@@ -216,8 +247,9 @@ float Robot::block_input_reference(float width_block, float val_low, float val_h
   /*
    * Returns a float following a block signal every time it's called. The block starts
    * on val_low and goes to val_high, and has a width of width_block. The signal is
-   * periodical
+   * periodical.
    */
+   
    float ref;
    if (counter < width_block)
    {
@@ -239,6 +271,10 @@ float Robot::block_input_reference(float width_block, float val_low, float val_h
 
 void Robot::block_input_excitation(float breedte_blokpuls)
 {
+  /**
+   * Writes a periodic block input voltage signal to both motors.
+   * Used for the identification of the motors.
+   */
   
   if (counter < breedte_blokpuls)
   {
@@ -275,7 +311,12 @@ void Robot::block_input_excitation(float breedte_blokpuls)
 
 void Robot::test()
 {
-  int v_motor1 = System.getGPinInt(0);    //linkse motor als wagentje rechtop is   EN deze functie verwijst naar IntOut0
+  /**
+   * Writes a voltage signal to the motors based on input from QRobotics center.
+   * Used for initial tests on the cart.
+   */
+   
+    int v_motor1 = System.getGPinInt(0);    //linkse motor als wagentje rechtop is   EN deze functie verwijst naar IntOut0
     int v_motor2 = System.getGPinInt(1);    //rechtse motor als wagentje rechtop is  EN deze functie verwijst naar IntOut1
 
     _motor1 -> setBridgeVoltage(v_motor1); // set motor1 voltage to variable v_motor
