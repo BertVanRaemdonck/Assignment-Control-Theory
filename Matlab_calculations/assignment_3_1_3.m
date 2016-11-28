@@ -58,24 +58,24 @@ t_stop = 5;
 if show_figures2 == 1
     figure('name', 'Comparison speed motor 1 with force disturbance')
     subplot(2,2,1)
-    plot(t, speed1_des);
+    plot(t, speed1_des,'--');
     hold on
-    plot(t, speed1_act,'--');
+    plot(t, speed1_act);
     hold off
     xlabel('t [s]')
     ylabel('speed [?]')
     axis([t_start t_stop -inf inf]);
-    legend('desired speed','actual speed','location','northwest')
+    legend('desired speed','actual speed','location','northeast')
     title('speed comparison of motor 1')
     subplot(2,2,2)
-    plot(t, speed1_des);
+    plot(t, speed1_des,'--');
     hold on
-    plot(t, speed1_PIcomp_fb,'--');
+    plot(t, speed1_PIcomp_fb);
     hold off
     xlabel('t [s]')
     ylabel('speed [?]')
     axis([t_start t_stop -inf inf]);
-    legend('desired speed','simulated speed','location','northwest')
+    legend('desired speed','simulated speed','location','southeast')
     title('speed comparison of motor 1')
     subplot(2,2,3)
     plot(t, speed1_act-speed1_des);
@@ -85,7 +85,7 @@ if show_figures2 == 1
     xlabel('t [s]')
     ylabel('\Deltaspeed [?]')
     axis([t_start t_stop -inf inf]);
-    legend('error actual','error simulated')
+    legend('error actual','error simulated','location','southeast')
     title('error between speed and desired speed')
     subplot(2,2,4)
     plot(t, control_signal1);
@@ -99,24 +99,24 @@ end
 if show_figures2 == 1
     figure('name', 'Comparison speed motor 2 with force disturbance')
     subplot(2,2,1)
-    plot(t, speed2_des);
+    plot(t, speed2_des,'--');
     hold on
-    plot(t, speed2_act,'--');
+    plot(t, speed2_act);
     hold off
     xlabel('t [s]')
     ylabel('speed [?]')
     axis([t_start t_stop -inf inf]);
-    legend('desired speed','actual speed','location','northwest')
+    legend('desired speed','actual speed','location','southeast')
     title('speed comparison of motor 2')
     subplot(2,2,2)
-    plot(t, speed2_des);
+    plot(t, speed2_des,'--');
     hold on
-    plot(t, speed2_PIcomp_fb,'--');
+    plot(t, speed2_PIcomp_fb);
     hold off
     xlabel('t [s]')
     ylabel('speed [?]')
     axis([t_start t_stop -inf inf]);
-    legend('desired speed','simulated speed','location','northwest')
+    legend('desired speed','simulated speed','location','northeast')
     title('speed comparison of motor 2')
     subplot(2,2,3)
     plot(t, speed2_act-speed2_des);

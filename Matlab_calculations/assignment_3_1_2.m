@@ -285,9 +285,9 @@ speed2_PIcomp_fb = lsim(sys_enc2_PIcomp_fb,speed2_des,t,':');
 if show_figures2 == 1
     figure('name', 'Comparison speed motor 1')
     subplot(2,2,1)
-    plot(t, speed1_des);
+    plot(t, speed1_des,'--');
     hold on
-    plot(t, speed1_act,'--');
+    plot(t, speed1_act);
     hold off
     xlabel('t [s]')
     ylabel('speed [?]')
@@ -295,9 +295,9 @@ if show_figures2 == 1
     legend('desired speed','actual speed','location','northwest')
     title('speed comparison of motor 1')
     subplot(2,2,2)
-    plot(t, speed1_des);
+    plot(t, speed1_des,'--');
     hold on
-    plot(t, speed1_PIcomp_fb,'--');
+    plot(t, speed1_PIcomp_fb);
     hold off
     xlabel('t [s]')
     ylabel('speed [?]')
@@ -326,9 +326,9 @@ end
 if show_figures2 == 1
     figure('name', 'Comparison speed motor 2')
     subplot(2,2,1)
-    plot(t, speed2_des);
+    plot(t, speed2_des,'--');
     hold on
-    plot(t, speed2_act,'--');
+    plot(t, speed2_act);
     hold off
     xlabel('t [s]')
     ylabel('speed [?]')
@@ -336,9 +336,9 @@ if show_figures2 == 1
     legend('desired speed','actual speed','location','northwest')
     title('speed comparison of motor 2')
     subplot(2,2,2)
-    plot(t, speed2_des);
+    plot(t, speed2_des,'--');
     hold on
-    plot(t, speed2_PIcomp_fb,'--');
+    plot(t, speed2_PIcomp_fb);
     hold off
     xlabel('t [s]')
     ylabel('speed [?]')
