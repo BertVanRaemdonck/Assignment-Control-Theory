@@ -1,7 +1,11 @@
-close all
-clear all
-clc
-clear
+if ~ exist('show_figures3', 'var')
+    close all
+    clear all
+    clc
+    clear
+    show_figures3 = 1;   % show_figures3 can be set to 0 in another file to suppress the figures in this code
+end
+
 
 %% Assignment_3_1_2.m opvragen
 show_figures = 0;   % assignment_3_1_1 doesn't display its figures, if set to zero, so works a bit faster
@@ -55,7 +59,7 @@ t_start = 0;
 t_stop = 5;
 
 % Plotting data speed motor 1
-if show_figures2 == 1
+if show_figures3 == 1
     figure('name', 'Comparison speed motor 1 with force disturbance')
     subplot(2,2,1)
     plot(t, speed1_des,'--');
@@ -96,7 +100,7 @@ if show_figures2 == 1
 end
 
 % Plotting data speed motor 2
-if show_figures2 == 1
+if show_figures3 == 1
     figure('name', 'Comparison speed motor 2 with force disturbance')
     subplot(2,2,1)
     plot(t, speed2_des,'--');

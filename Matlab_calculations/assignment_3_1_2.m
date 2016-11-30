@@ -1,8 +1,3 @@
-close all
-clear all
-clc
-clear
-
 if ~ exist('show_figures2', 'var')
     close all
     clear all
