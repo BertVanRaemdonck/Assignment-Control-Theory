@@ -18,20 +18,27 @@ assignment_3_2_1
 close all
 clc
 
-sys_pos_1_open_c;
-sys_pos_1_open_d;
-
 sys_pos_1_open_c_fb = feedback(sys_pos_1_open_c,1);
-sys_pos_1_open_d_fb = feedback(sys_pos_1_open_c,1);
+sys_pos_1_open_d_fb = feedback(sys_pos_1_open_d,1);
 
 if show_figures5 == 1
-    figure('name','closed loop bode diagram positie 1 continuous time')
+    figure('name','closed loop bode diagram position 1 continuous time')
     bode(sys_pos_1_open_c_fb)
 end
 
 sys_pos_1_open_d = c2d(sys_pos_1_open_c,Ts);
 
 if show_figures5 == 1
-    figure('name','closed loop bode diagram positie 1 discrete time')
+    figure('name','closed loop bode diagram position 1 discrete time')
     bode(sys_pos_1_open_d_fb)
 end
+
+figure()
+subplot(1,2,1)
+rlocus(sys_pos_1_open_c)
+subplot(1,2,2)
+rlocus(sys_pos_2_open_c)
+
+
+
+clear show_figures5

@@ -326,5 +326,5 @@ if show_figures == 1
 end
 
 
-
+clear show_figures
 

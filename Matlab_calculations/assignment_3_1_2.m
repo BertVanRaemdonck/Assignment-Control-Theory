@@ -357,3 +357,6 @@ if show_figures2 == 1
     axis([t_start t_stop -inf inf]);
     title('control signal of motor 2')
 end
+
+
+clear show_figures2
