@@ -18,27 +18,112 @@ assignment_3_2_1
 close all
 clc
 
-sys_pos_1_open_c_fb = feedback(sys_pos_1_open_c,1);
-sys_pos_1_open_d_fb = feedback(sys_pos_1_open_d,1);
+sys_pos_1_close_c = feedback(sys_pos_1_open_c,1);
+sys_pos_1_close_d = feedback(sys_pos_1_open_d,1);
+
+sys_pos_2_close_c = feedback(sys_pos_2_open_c,1);
+sys_pos_2_close_d = feedback(sys_pos_2_open_d,1);
 
 if show_figures5 == 1
-    figure('name','closed loop bode diagram position 1 continuous time')
-    bode(sys_pos_1_open_c_fb)
+    figure('name','closed loop bode diagram position continuous time')
+    bode(sys_pos_1_close_c)
+    hold on
+    bode(sys_pos_2_close_c)
+    hold off
+    legend('position 1', 'position 2')
 end
 
 sys_pos_1_open_d = c2d(sys_pos_1_open_c,Ts);
+sys_pos_2_open_d = c2d(sys_pos_2_open_c,Ts);
 
 if show_figures5 == 1
-    figure('name','closed loop bode diagram position 1 discrete time')
-    bode(sys_pos_1_open_d_fb)
+    figure('name','closed loop bode diagram position discrete time')
+    bode(sys_pos_1_close_d)
+    hold on
+    bode(sys_pos_2_close_d)
+    hold off
+    legend('position 1', 'position 2')
 end
 
-figure()
-subplot(1,2,1)
-rlocus(sys_pos_1_open_c)
-subplot(1,2,2)
-rlocus(sys_pos_2_open_c)
+if show_figures5 == 1
+    figure('name','Root Locus of open loop position continuous time')
+    subplot(1,2,1)
+    rlocus(sys_pos_1_open_c)
+    subplot(1,2,2)
+    rlocus(sys_pos_2_open_c)
+end
+
+% From reading rlocus plot manually
+
+K_pos1 = 4.33;      % Gives damping ratio 0.7 and frequency 33.8
+K_pos2 = 11.5;      % Gives damping ratio 0.7 and frequency 65.1
+
+proportional_1 = tf([K_pos1],[1]);
+proportional_2 = tf([K_pos2],[1]);
+
+% With proportional controller
+sys_pos_1_close_comp_c = feedback(series(proportional_1,sys_pos_1_open_c),1);
+sys_pos_2_close_comp_c = feedback(series(proportional_2,sys_pos_2_open_c),1);
+
+if show_figures5 == 1
+    figure('name','closed loop with proportional controller continuous time')
+    bode(sys_pos_1_close_comp_c)
+    hold on
+    bode(sys_pos_2_close_comp_c)
+    hold off
+    legend('position 1', 'position 2')
+end
 
 
+
+%% Probeersel
+
+if show_figures5 == 1
+    figure('name','Step respons without proportional controller discrete time')
+    step(sys_pos_1_close_d)
+    hold on
+    step(sys_pos_2_close_d)
+    hold off
+    legend('position 1', 'position 2')
+end
+
+if show_figures5 == 1
+    figure('name','Root Locus of open loop position discrete time')
+    subplot(1,2,1)
+    rlocus(sys_pos_1_open_d)
+    subplot(1,2,2)
+    rlocus(sys_pos_2_open_d)
+end
+
+
+% From reading rlocus plot manually
+
+K_pos1_d = 4.73;      % Gives damping ratio 0.712 and frequency 38.3
+K_pos2_d = 15.1;      % Gives damping ratio 0.708 and frequency 99.4
+
+proportional_1_d = tf([K_pos1_d],[1]);
+proportional_2_d = tf([K_pos2_d],[1]);
+
+% With proportional controller
+sys_pos_1_close_comp_d = feedback(series(proportional_1_d,sys_pos_1_open_d),1);
+sys_pos_2_close_comp_d = feedback(series(proportional_2_d,sys_pos_2_open_d),1);
+
+if show_figures5 == 1
+    figure('name','closed loop with proportional controller discrete time')
+    bode(sys_pos_1_close_comp_d)
+    hold on
+    bode(sys_pos_2_close_comp_d)
+    hold off
+    legend('position 1', 'position 2')
+end
+
+if show_figures5 == 1
+    figure('name','Step respons with proportional controller discrete time')
+    step(sys_pos_1_close_comp_d)
+    hold on
+    step(sys_pos_2_close_comp_d)
+    hold off
+    legend('position 1', 'position 2')
+end
 
 clear show_figures5
