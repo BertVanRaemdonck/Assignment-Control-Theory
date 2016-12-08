@@ -54,16 +54,23 @@ if show_figures5 == 1
 end
 
 % From reading rlocus plot manually
-
 K_pos1 = 4.33;      % Gives damping ratio 0.7 and frequency 33.8
 K_pos2 = 11.5;      % Gives damping ratio 0.7 and frequency 65.1
+K = max(K_pos1, K_pos2);% Select same K for both systems so that they have the same steady state value
 
-proportional_1 = tf([K_pos1],[1]);
-proportional_2 = tf([K_pos2],[1]);
+% Or from setting the steady state error
+e_ss_des = 0.05;
+K = (1-e_ss_des)/(e_ss_des*evalfr(sys_pos_1_open_c,1e-5));  % should be evaluated at freqency 0, but Matlab doesn't like that
+
+proportional_1 = tf([K],[1]);
+proportional_2 = tf([K],[1]);
 
 % With proportional controller
-sys_pos_1_close_comp_c = feedback(series(proportional_1,sys_pos_1_open_c),1);
-sys_pos_2_close_comp_c = feedback(series(proportional_2,sys_pos_2_open_c),1);
+sys_pos_1_open_comp_c = series(proportional_1, sys_pos_1_open_c);
+sys_pos_2_open_comp_c = series(proportional_2, sys_pos_2_open_c);
+
+sys_pos_1_close_comp_c = feedback(sys_pos_1_open_comp_c,1);
+sys_pos_2_close_comp_c = feedback(sys_pos_2_open_comp_c,1);
 
 if show_figures5 == 1
     figure('name','closed loop with proportional controller continuous time')
@@ -74,6 +81,12 @@ if show_figures5 == 1
     legend('position 1', 'position 2')
 end
 
+figure()
+step(sys_pos_1_close_comp_c)
+hold on
+step(sys_pos_2_close_comp_c)
+hold off
+legend('position 1', 'position 2')
 
 
 %% Probeersel
