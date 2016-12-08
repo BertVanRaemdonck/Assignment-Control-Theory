@@ -27,9 +27,9 @@ speed_ref = (mag_speed_ref/4)*ones([1,nb_speed_ref/3]);     % used for the first
 speed_ref = [speed_ref  (mag_speed_ref/2)*ones([1,nb_speed_ref/3])];    % not for comparison with the reality
 speed_ref = [speed_ref  (mag_speed_ref/1)*ones([1,nb_speed_ref/3])];
 
-PM1 = 55;           % desired phase marge of controller 1
+PM1 = 55;           % desired phase margin of controller 1
 omega_co1 = 15;     % desired crossover frequency in rad/s -> higher than this won't decrease tr much because saturation
-PM2 = 55;           % desired phase marge of controller 2
+PM2 = 55;           % desired phase margin of controller 2
 omega_co2 = 15;     % desired crossover frequency in rad/s
 
 % Taking data from assignment_3_1_1.m
@@ -64,7 +64,7 @@ w = logspace(low_exp_w,high_exp_w,number_points_w);
 
 
 
-%% Design procedure PI encoder
+%% Design procedure PI's
 
 phase_PI1 = -(-180 + PM1 - interp1(w, ph1_c, omega_co1));   % phase of the PI controller at the crossover frequency for encoder 1
 phase_PI2 = -(-180 + PM2 - interp1(w, ph2_c, omega_co2));   % phase of the PI controller at the crossover frequency for encoder 2
@@ -187,15 +187,15 @@ uk = zeros(size(ek));
 den_contr_speed1 = cell2mat(sys_PI1_d.den);
 num_contr_speed1 = cell2mat(sys_PI2_d.num);
 
-for i = 1:length(ek)
+for time_index = 1:length(ek)
     % shift memories
-    j = 1;
+    memory_index = 1;
     while j > 0
-        ek_speed1(j+1) = ek_speed1(j+1-1);   % the j+1 is there because c++ starts from 0 but matlab from 1
-        uk_speed1(j+1) = uk_speed1(j+1-1);
-        j = j-1;
+        ek_speed1(memory_index+1) = ek_speed1(memory_index+1-1);   % the j+1 is there because c++ starts from 0 but matlab from 1
+        uk_speed1(memory_index+1) = uk_speed1(memory_index+1-1);
+        memory_index = memory_index-1;
     end
-    ek_speed1(1) = ek(i);
+    ek_speed1(1) = ek(time_index);
     
     % compute new voltage
     uk_speed1(0+1) = 1/(den_contr_speed1(0+1)) * ...
@@ -212,7 +212,7 @@ for i = 1:length(ek)
     end
     
     % put control signal in vector for viewing
-    uk(i) = uk_speed1(1);
+    uk(time_index) = uk_speed1(1);
     
 end
 

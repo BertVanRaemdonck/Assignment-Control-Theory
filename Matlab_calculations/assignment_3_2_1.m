@@ -23,24 +23,24 @@ sys_enc2_PIcomp_fb_c = feedback(sys_enc2_PIcomp_c,1);   % Feedback system of spe
 differentiator = tf([1,0],[0,1]);   % differentiator = s
 integrator = tf([0,1],[1,0]);       % integrator = 1/s
 
-sys_pos_1_open_c = series(differentiator,series(sys_enc1_PIcomp_fb_c,integrator));    % open loop system of position 1
-sys_pos_2_open_c = series(differentiator,series(sys_enc2_PIcomp_fb_c,integrator));    % open loop system of position 2
+sys_pos1_open_c = series(differentiator,series(sys_enc1_PIcomp_fb_c,integrator));    % open loop system of position 1
+sys_pos2_open_c = series(differentiator,series(sys_enc2_PIcomp_fb_c,integrator));    % open loop system of position 2
 
 if show_figures4 == 1
     figure('name', 'open loop bode diagram position 1 continuous time')
-    bode(sys_pos_1_open_c)
+    bode(sys_pos1_open_c)
     figure('name', 'open loop bode diagram position 2 continuous time')
-    bode(sys_pos_2_open_c)
+    bode(sys_pos2_open_c)
 end
 
-sys_pos_1_open_d = c2d(sys_pos_1_open_c, Ts);
-sys_pos_2_open_d = c2d(sys_pos_2_open_c, Ts);
+sys_pos1_open_d = c2d(sys_pos1_open_c, Ts);
+sys_pos2_open_d = c2d(sys_pos2_open_c, Ts);
 
 if show_figures4 == 1
     figure('name', 'open loop bode diagram position 1 discrete time')
-    bode(sys_pos_1_open_d)
+    bode(sys_pos1_open_d)
     figure('name', 'open loop bode diagram position 2 discrete time')
-    bode(sys_pos_2_open_d)
+    bode(sys_pos2_open_d)
 end
 
 

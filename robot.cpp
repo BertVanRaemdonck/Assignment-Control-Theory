@@ -93,26 +93,35 @@ void Robot::controller_position(float pos1_des, float pos2_des)
 
   // unwrap encoder values
   enc1 = unwrap(enc1, enc1_prev);
-  enc2 = unwrap(enc2, enc2_prev);   
+  enc2 = unwrap(enc2, enc2_prev);
+    
+  // shift memories
+  for(int i = 1; i > 0; i--){
+    ek_pos1[i] = ek_pos1[i-1];
+    uk_pos1[i] = uk_pos1[i-1];
+    ek_pos2[i] = ek_pos2[i-1];
+    uk_pos2[i] = uk_pos2[i-1];
+  }   
 
-  // calculating error signal
-  float error_pos1 = pos1_des - enc1;
-  float error_pos2 = pos2_des - enc2;
+  // calculate new tracking error
+  ek_pos1[0] = pos1_des - enc1;
+  ek_pos2[0] = pos2_des - enc2;
 
   // implementing proportional controller
-  error_pos1 *= num_contr_pos1[0];
-  error_pos2 *= num_contr_pos2[0];
+  if (sel_pos_contr == 0) {
+    uk_pos1[0] = 1/(den_Pcontr_pos1[0]) * (num_Pcontr_pos1[0]*ek_pos1[0]);
+    uk_pos2[0] = 1/(den_Pcontr_pos1[0]) * (num_Pcontr_pos1[0]*ek_pos1[0]);
+  } else {
+    uk_pos1[0] = 1/(den_PIcontr_pos1[0]) * (-den_PIcontr_pos1[1]*uk_pos1[1] + num_PIcontr_pos1[0]*ek_pos1[0] + num_PIcontr_pos1[1]*ek_pos1[1]);
+    uk_pos2[0] = 1/(den_PIcontr_pos2[0]) * (-den_PIcontr_pos2[1]*uk_pos2[1] + num_PIcontr_pos2[0]*ek_pos2[0] + num_PIcontr_pos2[1]*ek_pos2[1]);
+  }
 
-  // calculating desired speed
-  float speed1_des = (error_pos1 - ek_pos1[0])/Ts;
-  float speed2_des = (error_pos2 - ek_pos2[0])/Ts;
+  // calculate desired speed
+  float speed1_des = (ek_pos1[0] - ek_pos1[1])/Ts;
+  float speed2_des = (ek_pos2[0] - ek_pos2[1])/Ts;
 
   // using speed controller
   controller_speed(speed1_des, speed2_des);
-
-  // shifting memories
-  ek_pos1[0] = error_pos1;
-  ek_pos2[0] = error_pos2;
   
 }
   
@@ -200,11 +209,12 @@ void Robot::reset_controller()
         uk_speed1[k] = 0.0;
         ek_speed2[k] = 0.0;
         uk_speed2[k] = 0.0;
-    }
 
-    // set previous errors of the position to zero
-    ek_pos1[0] = 0.0;
-    ek_pos2[0] = 0.0;
+        ek_pos1[k] = 0.0;
+        uk_pos1[k] = 0.0;
+        ek_pos2[k] = 0.0;
+        uk_pos2[k] = 0.0;
+    }
     
 }
 

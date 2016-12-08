@@ -60,16 +60,30 @@ private:
   float num_contr_speed2[2] = {4.1780, -3.1331};
   float den_contr_speed2[2] = {1.0, -1.0};
 
+  // Selector to choose what position controller you want
+  // 0 = P controller
+  // 1 = PI controller
+  int sel_pos_contr = 0;
+
   // Memory of the position controller
-  float ek_pos1[1] = {0.0};
-  float ek_pos2[1] = {0.0};
+  float ek_pos1[2] = {0.0, 0.0};
+  float ek_pos2[2] = {0.0, 0.0};
+  float uk_pos1[2] = {0.0, 0.0};
+  float uk_pos2[2] = {0.0, 0.0};
 
-  // Parameters of the position controller
-  float num_contr_pos1[1] = {19.0};
-  float den_contr_pos1[1] = {1.0}; 
+  // Parameters of the P position controller
+  float num_Pcontr_pos1[1] = {19.0};
+  float den_Pcontr_pos1[1] = {1.0}; 
 
-  float num_contr_pos2[1] = {19.0};
-  float den_contr_pos2[1] = {1.0};
+  float num_Pcontr_pos2[1] = {19.0};
+  float den_Pcontr_pos2[1] = {1.0};
+
+  // Parameters of the PI position controller
+  float num_PIcontr_pos1[2] = {5.1934, -4.5161}; 
+  float den_PIcontr_pos1[2] = {1.0, -1.0};
+
+  float num_PIcontr_pos2[2] = {5.7393, -5.5916};
+  float den_PIcontr_pos2[2] = {1.0, -1.0};
 
 
 public:
