@@ -50,13 +50,20 @@ void Robot::controllerHook(){
    float speed2_des = System.getGPinFloat(1);
    int enc1_curr = _encoder1 ->readRawValue();
    int enc2_curr = _encoder2 ->readRawValue();
+   float pos1_des = System.getGPinFloat(2);
+   float pos2_des = System.getGPinFloat(3);
    
-   controller_speed(speed1_des, speed2_des);
+   controller_position(pos1_des, pos2_des);
    
    System.setGPoutFloat(0, speed1_des);
    System.setGPoutFloat(1,(enc1_curr-enc1_prev)/Ts);
+   System.setGPoutFloat(2, pos1_des);
+   System.setGPoutFloat(3, enc1_curr);
    System.setGPoutFloat(4, speed2_des);
    System.setGPoutFloat(5, (enc2_curr-enc2_prev)/Ts);
+   System.setGPoutFloat(6, pos2_des);
+   System.setGPoutFloat(7, enc2_curr);
+   
    enc1_prev = enc1_curr;
    enc2_prev = enc2_curr;
 
@@ -71,6 +78,39 @@ void Robot::controllerHook(){
     counter = 0.0;
 	}
 }
+
+
+void Robot::controller_position(float pos1_des, float pos2_des)
+{
+  /**
+   * This is the implemented position controller.
+   * This can be used to control the position of the motors seperatly.
+   */
+
+  // read encoder values
+  int enc1 = _encoder1 ->readRawValue();
+  int enc2 = _encoder2 ->readRawValue();
+
+  // unwrap encoder values
+  enc1 = unwrap(enc1, enc1_prev);
+  enc2 = unwrap(enc2, enc2_prev);   
+
+  // calculating error signal
+  float error_pos1 = pos1_des - enc1;
+  float error_pos2 = pos2_des - enc2;
+
+  // calculating desired speed
+  float speed1_des = (error_pos1 - error_pos1_prev)/Ts;
+  float speed2_des = (error_pos2 - error_pos2_prev)/Ts;
+
+  // using speed controller
+  controller_speed(speed1_des, speed2_des);
+
+  // shifting memories
+  float error_pos1_prev = error_pos1;
+  float error_pos1_prev = error_pos1;
+  
+
 
 void Robot::controller_speed(float speed1_des, float speed2_des)
 {
@@ -155,6 +195,11 @@ void Robot::reset_controller()
         ek_speed2[k] = 0.0;
         uk_speed2[k] = 0.0;
     }
+
+    // set previous errors of the position to zero
+    float error_pos1_prev = 0.0;
+    float error_pos2_prev = 0.0;
+    
 }
 
 

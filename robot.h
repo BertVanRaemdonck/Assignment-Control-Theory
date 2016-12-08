@@ -60,6 +60,13 @@ private:
   float num_contr_speed2[2] = {4.1780, -3.1331};
   float den_contr_speed2[2] = {1.0, -1.0};
 
+  // Parameters of the position controller
+  float num_contr_pos1[2] = {19.0};
+  float den_contr_pos1[2] = {1.0}; 
+
+  float num_contr_pos2[2] = {19.0};
+  float den_contr_pos2[2] = {1.0};
+
 
 public:
     Robot(uint8_t ID = 0);
@@ -81,7 +88,7 @@ public:
   void controller_speed(float, float);
   void reset_controller();
   int unwrap(int, int);
-
+  void controller_position(float, float);
 	///////
 	/// GET
     uint8_t id();
