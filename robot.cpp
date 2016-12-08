@@ -99,16 +99,22 @@ void Robot::controller_position(float pos1_des, float pos2_des)
   float error_pos1 = pos1_des - enc1;
   float error_pos2 = pos2_des - enc2;
 
+  // implementing proportional controller
+  error_pos1 *= num_contr_pos1[0];
+  error_pos2 *= num_contr_pos2[0];
+
   // calculating desired speed
-  float speed1_des = (error_pos1 - error_pos1_prev)/Ts;
-  float speed2_des = (error_pos2 - error_pos2_prev)/Ts;
+  float speed1_des = (error_pos1 - ek_pos1[0])/Ts;
+  float speed2_des = (error_pos2 - ek_pos2[0])/Ts;
 
   // using speed controller
   controller_speed(speed1_des, speed2_des);
 
   // shifting memories
-  float error_pos1_prev = error_pos1;
-  float error_pos1_prev = error_pos1;
+  ek_pos1[0] = error_pos1;
+  ek_pos2[0] = error_pos2;
+  
+}
   
 
 
@@ -197,8 +203,8 @@ void Robot::reset_controller()
     }
 
     // set previous errors of the position to zero
-    float error_pos1_prev = 0.0;
-    float error_pos2_prev = 0.0;
+    ek_pos1[0] = 0.0;
+    ek_pos2[0] = 0.0;
     
 }
 

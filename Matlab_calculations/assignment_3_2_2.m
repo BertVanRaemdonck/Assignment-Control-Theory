@@ -6,7 +6,7 @@ if ~ exist('show_figures5', 'var')
     show_figures5 = 1;   % show_figures3 can be set to 0 in another file to suppress the figures in this code
 end
 
-%% Assignment_3_1_3.m opvragen
+%% Run assignment_3_1_3.m
 show_figures = 0;   % assignment_3_1_1 doesn't display its figures, if set to zero, so works a bit faster
 show_figures2 = 0;  % assignment_3_1_2 doesn't display its figures, if set to zero, so works a bit faster
 show_figures3 = 0;  % assignment_3_1_3 doesn't display its figures, if set to zero, so works a bit faster
@@ -52,6 +52,8 @@ if show_figures5 == 1
     subplot(1,2,2)
     rlocus(sys_pos_2_open_c)
 end
+
+%% Designing proportional controller
 
 % From reading rlocus plot manually
 K_pos1 = 4.33;      % Gives damping ratio 0.7 and frequency 33.8
@@ -110,55 +112,5 @@ end
 sys_P_pos_1_d = c2d(proportional_1, Ts, 'zoh');
 sys_P_pos_2_d = c2d(proportional_1, Ts, 'zoh');
 
-
- %% Probeersel
-% 
-% if show_figures5 == 1
-%     figure('name','Step respons without proportional controller discrete time')
-%     step(sys_pos_1_close_d)
-%     hold on
-%     step(sys_pos_2_close_d)
-%     hold off
-%     legend('position 1', 'position 2')
-% end
-% 
-% if show_figures5 == 1
-%     figure('name','Root Locus of open loop position discrete time')
-%     subplot(1,2,1)
-%     rlocus(sys_pos_1_open_d)
-%     subplot(1,2,2)
-%     rlocus(sys_pos_2_open_d)
-% end
-% 
-% 
-% % From reading rlocus plot manually
-% 
-% K_pos1_d = 4.73;      % Gives damping ratio 0.712 and frequency 38.3
-% K_pos2_d = 15.1;      % Gives damping ratio 0.708 and frequency 99.4
-% 
-% proportional_1_d = tf([K_pos1_d],[1]);
-% proportional_2_d = tf([K_pos2_d],[1]);
-% 
-% % With proportional controller
-% sys_pos_1_close_comp_d = feedback(series(proportional_1_d,sys_pos_1_open_d),1);
-% sys_pos_2_close_comp_d = feedback(series(proportional_2_d,sys_pos_2_open_d),1);
-% 
-% if show_figures5 == 1
-%     figure('name','closed loop with proportional controller discrete time')
-%     bode(sys_pos_1_close_comp_d)
-%     hold on
-%     bode(sys_pos_2_close_comp_d)
-%     hold off
-%     legend('position 1', 'position 2')
-% end
-% 
-% if show_figures5 == 1
-%     figure('name','Step respons with proportional controller discrete time')
-%     step(sys_pos_1_close_comp_d)
-%     hold on
-%     step(sys_pos_2_close_comp_d)
-%     hold off
-%     legend('position 1', 'position 2')
-% end
 
 clear show_figures5

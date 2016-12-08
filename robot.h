@@ -60,12 +60,16 @@ private:
   float num_contr_speed2[2] = {4.1780, -3.1331};
   float den_contr_speed2[2] = {1.0, -1.0};
 
-  // Parameters of the position controller
-  float num_contr_pos1[2] = {19.0};
-  float den_contr_pos1[2] = {1.0}; 
+  // Memory of the position controller
+  float ek_pos1[1] = {0.0};
+  float ek_pos2[1] = {0.0};
 
-  float num_contr_pos2[2] = {19.0};
-  float den_contr_pos2[2] = {1.0};
+  // Parameters of the position controller
+  float num_contr_pos1[1] = {19.0};
+  float den_contr_pos1[1] = {1.0}; 
+
+  float num_contr_pos2[1] = {19.0};
+  float den_contr_pos2[1] = {1.0};
 
 
 public:
