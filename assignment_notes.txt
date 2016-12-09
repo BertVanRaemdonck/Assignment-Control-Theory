@@ -9,6 +9,9 @@ _______________________
 * Gebruik niet "1/2" om "0.5" aan te duiden, aangezien "/" een deling is die geen rekening houdt met de rest bij het delen van de integers
 * Bij elke log moet er nog handmatig een comment aan de .xml file toegevoegd worden
 
+* Maximale snelheid clippen op 2000 (in absolute waarde)
+	--> om ervoor te zorgen dat de wagen recht rijdt, nu trekt hij heel schuin door verschil in motoren
+
 
 
 Gebruik QRoboticsCenter

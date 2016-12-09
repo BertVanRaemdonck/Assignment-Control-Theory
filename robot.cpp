@@ -55,11 +55,11 @@ void Robot::controllerHook(){
    
    controller_position(pos1_des, pos2_des);
    
-   System.setGPoutFloat(0, speed1_des);
+   //System.setGPoutFloat(0, speed1_des);
    System.setGPoutFloat(1,(enc1_curr-enc1_prev)/Ts);
    System.setGPoutFloat(2, pos1_des);
    System.setGPoutFloat(3, enc1_curr);
-   System.setGPoutFloat(4, speed2_des);
+   //System.setGPoutFloat(4, speed2_des);
    System.setGPoutFloat(5, (enc2_curr-enc2_prev)/Ts);
    System.setGPoutFloat(6, pos2_des);
    System.setGPoutFloat(7, enc2_curr);
@@ -110,15 +110,25 @@ void Robot::controller_position(float pos1_des, float pos2_des)
   // implementing proportional controller
   if (sel_pos_contr == 0) {
     uk_pos1[0] = 1/(den_Pcontr_pos1[0]) * (num_Pcontr_pos1[0]*ek_pos1[0]);
-    uk_pos2[0] = 1/(den_Pcontr_pos1[0]) * (num_Pcontr_pos1[0]*ek_pos1[0]);
+    uk_pos2[0] = 1/(den_Pcontr_pos2[0]) * (num_Pcontr_pos2[0]*ek_pos2[0]);
   } else {
     uk_pos1[0] = 1/(den_PIcontr_pos1[0]) * (-den_PIcontr_pos1[1]*uk_pos1[1] + num_PIcontr_pos1[0]*ek_pos1[0] + num_PIcontr_pos1[1]*ek_pos1[1]);
     uk_pos2[0] = 1/(den_PIcontr_pos2[0]) * (-den_PIcontr_pos2[1]*uk_pos2[1] + num_PIcontr_pos2[0]*ek_pos2[0] + num_PIcontr_pos2[1]*ek_pos2[1]);
   }
 
   // calculate desired speed
-  float speed1_des = (ek_pos1[0] - ek_pos1[1])/Ts;
-  float speed2_des = (ek_pos2[0] - ek_pos2[1])/Ts;
+  float speed1_des = (uk_pos1[0] - uk_pos1[1])/Ts;
+  float speed2_des = (uk_pos2[0] - uk_pos2[1])/Ts;
+
+  // clipping desired speed (due to limited voltage)
+  // clip output of the controllers to allowed voltages
+  if(speed1_des > 2300) { speed1_des = 2300; }
+  if(speed1_des < -2300) { speed1_des = -2300; }
+  if(speed2_des > 2300) { speed2_des = 2300; }
+  if(speed2_des < -2300) { speed2_des = -2300; }
+
+  //System.setGPoutFloat(1,speed1_des);
+  //System.setGPoutFloat(5,speed2_des);
 
   // using speed controller
   controller_speed(speed1_des, speed2_des);
@@ -169,8 +179,8 @@ void Robot::controller_speed(float speed1_des, float speed2_des)
   if(uk_speed2[0] < -6000) { uk_speed2[0] = -6000; }
 
   // show control signal
-  System.setGPoutFloat(2, uk_speed1[0]);
-  System.setGPoutFloat(6, uk_speed2[0]);
+  System.setGPoutFloat(0, uk_speed1[0]);
+  System.setGPoutFloat(4, uk_speed2[0]);
 
   // drive the motors with the calculated values
   _motor1->setBridgeVoltage((int)uk_speed1[0]);

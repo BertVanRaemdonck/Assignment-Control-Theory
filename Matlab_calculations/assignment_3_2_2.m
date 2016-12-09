@@ -115,9 +115,9 @@ sys_P_pos2_d = c2d(sys_P_pos1, Ts, 'zoh');
 
 %% Design of PI controller
 
-PM_pos1 = 65;           % desired phase margin of controller 1
+PM_pos1 = 45;           % desired phase margin of controller 1
 omega_co_pos1 = 50;     % desired crossover frequency in rad/s
-PM_pos2 = 65;           % desired phase margin of controller 2
+PM_pos2 = 45;           % desired phase margin of controller 2
 omega_co_pos2 = 50;     % desired crossover frequency in rad/s
 
 % calculating magnitude and phase for needed calculations

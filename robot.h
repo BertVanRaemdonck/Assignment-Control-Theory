@@ -63,7 +63,7 @@ private:
   // Selector to choose what position controller you want
   // 0 = P controller
   // 1 = PI controller
-  int sel_pos_contr = 0;
+  int sel_pos_contr = 1;
 
   // Memory of the position controller
   float ek_pos1[2] = {0.0, 0.0};
@@ -79,10 +79,14 @@ private:
   float den_Pcontr_pos2[1] = {1.0};
 
   // Parameters of the PI position controller
-  float num_PIcontr_pos1[2] = {5.1934, -4.5161}; 
+  //float num_PIcontr_pos1[2] = {5.1934, -4.5161};   // oude controller   PM 65°
+  //float den_PIcontr_pos1[2] = {1.0, -1.0};
+  float num_PIcontr_pos1[2] = {3.5460, -2.3770};     // nieuwe controller   PM 45°
   float den_PIcontr_pos1[2] = {1.0, -1.0};
 
-  float num_PIcontr_pos2[2] = {5.7393, -5.5916};
+  //float num_PIcontr_pos2[2] = {5.7393, -5.5916};      // oude controller    PM 65°
+  //float den_PIcontr_pos2[2] = {1.0, -1.0};
+  float num_PIcontr_pos2[2] = {5.2922, -4.1719};      // nieuwe controller   PM 45°
   float den_PIcontr_pos2[2] = {1.0, -1.0};
 
 
