@@ -5,7 +5,9 @@ function [ x_next ] = f( x, u, Ts )
 %   Ts:     sample time
 %   x_next: state at index k+1
 
-x_next = zeros(3,1);
+x_next = [x(1)+(Ts*cos(x(3))*u(1));
+          x(2)+(Ts*sin(x(3))*u(1));
+          x(3)+(Ts*u(2))];
 
 end
 
