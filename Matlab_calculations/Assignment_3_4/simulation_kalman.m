@@ -23,21 +23,21 @@ n_u = 2;
 % number of measurements
 n_y = 2;
 % covariance of simulated process noise
-Q_sim = eye(n_x);
+Q_sim = 5e-6*eye(n_x);
 % covariance of simulated measurement noise
-R_sim = eye(n_y);
+R_sim = 5e-6*eye(n_y);
 % covariance of modeled process noise
-Q_mod = eye(n_x);
+Q_mod = 5e-6*eye(n_x);
 % covariance of simulated measurement noise
-R_mod = eye(n_y);
+R_mod = 5e-6*eye(n_y);
 % initial state
 x0 = zeros(n_x,1);
 % initial state estimate
 x_est0 = zeros(n_x,1);
 % feedback values
-kx = 0;
-ky = 0;
-kt = 0;
+kx = 0.5;
+ky = 0.5;
+kt = 0.5;
 % trajectory file
 filename = 'TrajectoryKalmanExercise.txt';
 
@@ -66,12 +66,27 @@ x_est(:,1) = x_est0;
 % feedback matrix
 K = [kx,  0,  0;
       0, ky, kt];
+  
+  
+% walls
+a1 = 0;
+b1 = 1;
+c1 = 0.1;   % line: y=0.05;
+a2 = 1;
+b2 = 0;
+c2 = 0.25;   % line: x=0.25
 
+figure()
+hold on
 % simulation
 for i = 2:length(t)
     % Plant simulation
-    x(:,i) = f(x(:,i-1), u(:,i-1), Ts) + (randn(1,n_x)*chol(Q_sim))';
-    y(:,i) = h(x(:,i)) + (randn(1,n_y)*chol(R_sim))';
+    x(:,i) = x_ref(:,i);% + (randn(1,n_x)*chol(Q_sim))';
+    u(:,i) = u_ref(:,i);% + (randn(1,n_y)*chol(R_sim))';
+    %x(:,i) = f(x(:,i-1), u(:,i-1), Ts) + (randn(1,n_x)*chol(Q_sim))';
+    %y(:,i) = h(x(:,i)) + (randn(1,n_y)*chol(R_sim))';
+    y(:,i) = [(a1*x(1,i)+b1*x(2,i)+c1)/sqrt(a1^2+b1^2);
+              (a2*x(1,i)+b2*x(2,i)+c2)/sqrt(a2^2+b2^2)];
 
     % Compute Jacobians
     A = Jf(x_est(:,i-1), u(:,i-1), Ts);
@@ -89,8 +104,18 @@ for i = 2:length(t)
     P_est(:,:,i) = (eye(n_x)-L(:,:,i)*C)*P_est(:,:,i);
 
     % Control law
-    e(:,i) = local_error(x_ref(:,i), x_est(:,i));
-    u(:,i) = u_ref(:,i) + K*e(:,i);
+    %e(:,i) = local_error(x_ref(:,i), x_est(:,i));
+    %u(:,i) = u_ref(:,i) + K*e(:,i);
+    
+    cont = drawellipsoid(P_est(1:2,1:2,i));
+    plot(cont(:,1), cont(:,2))
 end
+hold off
+
+figure()
+plot(x(1,:), x(2,:));
+hold on
+plot(x_est(1,:), x_est(2,:));
+hold off
 
 

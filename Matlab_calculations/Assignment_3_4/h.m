@@ -7,7 +7,7 @@ function [ y ] = h( x, u, Ts )
 
 a1 = 0;
 b1 = 1;
-c1 = 0.05;   % line: y=0.05;
+c1 = 0.1;   % line: y=0.05;
 a2 = 1;
 b2 = 0;
 c2 = 0.25;   % line: x=0.25
