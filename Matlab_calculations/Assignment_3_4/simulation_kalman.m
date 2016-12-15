@@ -23,13 +23,13 @@ n_u = 2;
 % number of measurements
 n_y = 2;
 % covariance of simulated process noise
-Q_sim = 5e-6*eye(n_x);
+Q_sim = 5e-7*eye(n_x);
 % covariance of simulated measurement noise
-R_sim = 5e-6*eye(n_y);
+R_sim = 5e-4*eye(n_y);
 % covariance of modeled process noise
-Q_mod = 5e-6*eye(n_x);
+Q_mod = 5e-7*eye(n_x);
 % covariance of simulated measurement noise
-R_mod = 5e-6*eye(n_y);
+R_mod = 5e-4*eye(n_y);
 % initial state
 x0 = zeros(n_x,1);
 % initial state estimate
@@ -42,6 +42,9 @@ kt = 0.5;
 filename = 'TrajectoryKalmanExercise.txt';
 
 % ============================== Simulation ===============================
+dead_reckoning = 0; % set to 1 to see the result with dead reckoning
+state_feedback = 0; % set to 1 to enable state feedback
+
 % read file
 data = dlmread(filename, '\t', 1, 0);
 t = data(:,1)';
@@ -75,37 +78,46 @@ c1 = 0.1;   % line: y=0.05;
 a2 = 1;
 b2 = 0;
 c2 = 0.25;   % line: x=0.25
+wall_params = [a1, b1, c1 ; a2, b2, c2];
 
 figure()
 hold on
 % simulation
 for i = 2:length(t)
-    % Plant simulation
-    x(:,i) = x_ref(:,i);% + (randn(1,n_x)*chol(Q_sim))';
-    u(:,i) = u_ref(:,i);% + (randn(1,n_y)*chol(R_sim))';
-    %x(:,i) = f(x(:,i-1), u(:,i-1), Ts) + (randn(1,n_x)*chol(Q_sim))';
-    %y(:,i) = h(x(:,i)) + (randn(1,n_y)*chol(R_sim))';
-    y(:,i) = [(a1*x(1,i)+b1*x(2,i)+c1)/sqrt(a1^2+b1^2);
-              (a2*x(1,i)+b2*x(2,i)+c2)/sqrt(a2^2+b2^2)];
+    % Plant simulation    
+    if state_feedback == 1
+        x(:,i) = f(x(:,i-1), u(:,i-1), Ts) + (randn(1,n_x)*chol(Q_sim))';
+        y(:,i) = h(wall_params, x(:,i)) + (randn(1,n_y)*chol(R_sim))';
+    else
+        x(:,i) = x_ref(:,i) + (randn(1,n_x)*chol(Q_sim))';
+        u(:,i) = u_ref(:,i) + (randn(1,n_y)*chol(R_sim))';
+    end
+        
+    y(:,i) = [(a1*x(1,i)+b1*x(2,i)-c1)/sqrt(a1^2+b1^2);
+              (a2*x(1,i)+b2*x(2,i)-c2)/sqrt(a2^2+b2^2)];
 
     % Compute Jacobians
     A = Jf(x_est(:,i-1), u(:,i-1), Ts);
-    C = Jh(x_est(:,i-1));
+    C = Jh(wall_params, x_est(:,i-1));
 
     % Kalman prediction step
     x_est(:,i) = f(x_est(:,i-1), u(:,i-1), Ts);
     P_est(:,:,i) = A*P_est(:,:,i-1)*A' + Q_mod;
 
-    % Kalman correction step
-    nu(:,i) = y(:,i) - h(x_est(:,i));
-    S(:,:,i) = C*P_est(:,:,i)*C' + R_mod;
-    L(:,:,i) = P_est(:,:,i)*C'/S(:,:,i);
-    x_est(:,i) = x_est(:,i) + L(:,:,i)*nu(:,i);
-    P_est(:,:,i) = (eye(n_x)-L(:,:,i)*C)*P_est(:,:,i);
+    if dead_reckoning ~= 1
+        % Kalman correction step
+        nu(:,i) = y(:,i) - h(wall_params, x_est(:,i));
+        S(:,:,i) = C*P_est(:,:,i)*C' + R_mod;
+        L(:,:,i) = P_est(:,:,i)*C'/S(:,:,i);
+        x_est(:,i) = x_est(:,i) + L(:,:,i)*nu(:,i);
+        P_est(:,:,i) = (eye(n_x)-L(:,:,i)*C)*P_est(:,:,i);
+    end
 
     % Control law
-    %e(:,i) = local_error(x_ref(:,i), x_est(:,i));
-    %u(:,i) = u_ref(:,i) + K*e(:,i);
+    if state_feedback == 1
+        e(:,i) = local_error(x_ref(:,i), x_est(:,i));
+        u(:,i) = u_ref(:,i) + K*e(:,i);
+    end
     
     cont = drawellipsoid(P_est(1:2,1:2,i));
     plot(cont(:,1), cont(:,2))
@@ -117,5 +129,6 @@ plot(x(1,:), x(2,:));
 hold on
 plot(x_est(1,:), x_est(2,:));
 hold off
+legend('actual', 'estimated')
 
 
