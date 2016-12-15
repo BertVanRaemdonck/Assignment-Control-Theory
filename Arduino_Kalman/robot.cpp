@@ -9,6 +9,7 @@
 #define DIST1_PIN		A0
 #define DIST2_PIN		A1
 #define MOT1_PIN_IN1	8u
+#define MOT1_PIN_IN2	12u
 #define MOT1_PIN_EN		6u
 #define MOT2_PIN_IN1	7u
 #define MOT2_PIN_IN2	4u
@@ -59,17 +60,20 @@ void Robot::controllerHook() {
     if (System.getGPinInt(0)) {
       ##implement correction step using _ekf.CorrectionStep(...)##
     }
-  }
-
-  //navigator
-  else if (navigationEnabled()) {
-    //compute feedback
-    float xref_arr [3][1] = { {System.getGPinFloat(0)}, {System.getGPinFloat(1)}, {System.getGPinFloat(2)} };
-    float uff_arr [2][1] = { {System.getGPinFloat(3)}, {System.getGPinFloat(4)} };
-    NavigationController::u_t unav = _nav.Controller(_ekf.getState(), NavigationController::x_t(xref_arr), NavigationController::u_t(uff_arr));
-    //send wheel speed command
-    NavigationController::u_t vLR = _nav.ControlToWheelSpeeds(unav);
-    velocityControlUpdate(vLR(0), vLR(1));
+    
+    //navigator
+    if (navigationEnabled()) {
+      //compute feedback
+      float xref_arr [3][1] = { {System.getGPinFloat(0)}, {System.getGPinFloat(1)}, {System.getGPinFloat(2)} };
+      float uff_arr [2][1] = { {System.getGPinFloat(3)}, {System.getGPinFloat(4)} };
+      NavigationController::u_t unav = _nav.Controller(_ekf.getState(), NavigationController::x_t(xref_arr), NavigationController::u_t(uff_arr));
+      //send wheel speed command
+      NavigationController::u_t vLR = _nav.ControlToWheelSpeeds(unav);
+      velocityControlUpdate(vLR(0), vLR(1));
+    } else {
+      _motor1->setBridgeVoltage(0);
+      _motor2->setBridgeVoltage(0);
+    }
   } else {
     _motor1->setBridgeVoltage(0);
     _motor2->setBridgeVoltage(0);
