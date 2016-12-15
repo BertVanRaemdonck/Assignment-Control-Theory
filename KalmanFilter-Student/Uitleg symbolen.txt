@@ -1,0 +1,22 @@
+UITLEG VAN DE SYMBOLEN GEBRUIKT IN DE CODE VAN DE ASSISTENTEN
+
+
+* x_t = geschatte staat op dat moment   	(kolomvector 3x1 waarschijnlijk)
+	--> type van variabele, geen naam
+* y_t = output = afstanden tot de muren 	(kolomvector 2x1 waarschijnlijk)
+	--> type van variabele, geen naam
+
+* x_t& x = de naam van deze variabele van type x_t is x
+	--> dus niet x_t gebruiken in de vergelijkingen
+	--> x gebruiken in de vergelijkingen!!!!
+
+
+
+
+SPECIALE DINGEN DIE DE ASSISTENTEN DOEN IN HUN CODE  (hip hoi)
+
+* M_PI = de pi waarde, in een macro gezet en met veel meer cijfers achter de komma
+
+* #define "variabele naam" "variabele waarde" = vervangt tijdens het compilen elke "variabele naam" door "variabele waarde"
+	--> dus als je zo stom bent om "variabele naam" = n te doen, dan vervangt hij elke 'n' door die waarde
+	--> HANDIG *NOT 
