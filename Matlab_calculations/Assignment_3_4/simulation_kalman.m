@@ -44,6 +44,7 @@ filename = 'TrajectoryKalmanExercise.txt';
 % ============================== Simulation ===============================
 dead_reckoning = 0; % set to 1 to see the result with dead reckoning
 state_feedback = 0; % set to 1 to enable state feedback
+nb_walls = 2;       % can be set to 1 or 2 to give the amount of walls
 
 % read file
 data = dlmread(filename, '\t', 1, 0);
@@ -68,33 +69,39 @@ x_est(:,1) = x_est0;
 
 % feedback matrix
 K = [kx,  0,  0;
-      0, ky, kt];
-  
+      0, ky, kt];  
   
 % walls
+% wall 1: y = 0.05
 a1 = 0;
 b1 = 1;
-c1 = 0.1;   % line: y=0.05;
-a2 = 1;
-b2 = 0;
-c2 = 0.25;   % line: x=0.25
+c1 = 0.1;
+if nb_walls == 1
+    % wall 1 = wall 2 so that there is only one distinct wall
+    a2 = a1;
+    b2 = b1;
+    c2 = c1;
+else
+    % wall 2: x = 0.25
+    a2 = 1;
+    b2 = 0;
+    c2 = 0.25;
+end
+
 wall_params = [a1, b1, c1 ; a2, b2, c2];
 
 figure()
 hold on
 % simulation
+
+if state_feedback ~= 1
+    u = u_ref;
+end
+
 for i = 2:length(t)
     % Plant simulation    
-    if state_feedback == 1
-        x(:,i) = f(x(:,i-1), u(:,i-1), Ts) + (randn(1,n_x)*chol(Q_sim))';
-        y(:,i) = h(wall_params, x(:,i)) + (randn(1,n_y)*chol(R_sim))';
-    else
-        x(:,i) = x_ref(:,i) + (randn(1,n_x)*chol(Q_sim))';
-        u(:,i) = u_ref(:,i) + (randn(1,n_y)*chol(R_sim))';
-    end
-        
-    y(:,i) = [(a1*x(1,i)+b1*x(2,i)-c1)/sqrt(a1^2+b1^2);
-              (a2*x(1,i)+b2*x(2,i)-c2)/sqrt(a2^2+b2^2)];
+    x(:,i) = f(x(:,i-1), u(:,i-1), Ts) + (randn(1,n_x)*chol(Q_sim))';
+    y(:,i) = h(wall_params, x(:,i)) + (randn(1,n_y)*chol(R_sim))';
 
     % Compute Jacobians
     A = Jf(x_est(:,i-1), u(:,i-1), Ts);
@@ -103,7 +110,8 @@ for i = 2:length(t)
     % Kalman prediction step
     x_est(:,i) = f(x_est(:,i-1), u(:,i-1), Ts);
     P_est(:,:,i) = A*P_est(:,:,i-1)*A' + Q_mod;
-
+        
+        
     if dead_reckoning ~= 1
         % Kalman correction step
         nu(:,i) = y(:,i) - h(wall_params, x_est(:,i));
