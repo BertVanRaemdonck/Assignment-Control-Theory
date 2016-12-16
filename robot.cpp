@@ -18,6 +18,11 @@
 #define LED2_PIN 		40
 #define BATTERY_VOLTAGE	6000
 
+float initial_distance;
+float relative_distance;
+float RAD_TO_ENC; 
+float ENC_TO_RAD; 
+
 
 Robot::Robot(uint8_t ID):
 	_ID(ID),
@@ -38,7 +43,12 @@ void Robot::init(){
 	resetEncoders();
   // reset controller so that it does not do crazy things when we restart it
   reset_controller();
+  // reset position fusion functions
+  reset_position_fusion();
   counter = 0.0;
+
+  
+  
 }
 
 void Robot::controllerHook(){
@@ -78,6 +88,22 @@ void Robot::controllerHook(){
     counter = 0.0;
 	}
 }
+
+
+void Robot::position_sensor_fusion(float speed_cart)
+{
+  /**
+   * This is the code for the position sensor fusion.
+   * Here we read the outputs of the sensors and compare them to the estimated (position)state of the cart.
+   */
+
+   float relative_distance_next = relative_distance + Ts*speed_cart;  // This is the second line of the state equations, first line is d = d.
+
+   float absolute_distance = initial_distance + relative_distance;    // This is the output equation.
+
+   
+}
+
 
 
 void Robot::controller_position(float pos1_des, float pos2_des)
@@ -203,6 +229,23 @@ int Robot::unwrap(int curr_val, int prev_val){
     curr_val = curr_val + 65536;
   }
   return curr_val;
+}
+
+
+void Robot::reset_position_fusion()
+{
+  /**
+   * Resets the position fusion states.
+   * This is to avoid weird behaviour, due to transient respons of the wrong input, 
+   *    when the cart restarts.
+   */
+   
+    initial_distance = _distance1->readCalibratedValue();
+    relative_distance = 0.0;
+    RAD_TO_ENC = ((34.0*11.0*2.0)/(2*3.141593));
+    ENC_TO_RAD = 1/RAD_TO_ENC;
+    
+    
 }
 
 void Robot::reset_controller()

@@ -111,6 +111,8 @@ public:
   void reset_controller();
   int unwrap(int, int);
   void controller_position(float, float);
+  void position_sensor_fusion(float);
+  void reset_position_fusion();
 	///////
 	/// GET
     uint8_t id();
