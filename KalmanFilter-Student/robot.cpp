@@ -53,12 +53,22 @@ void Robot::controllerHook() {
 
   //Kalman filtering
   if (KalmanFilterEnabled()) {
-    //prediction step
-    ##implement prediction step using _ekf.PredictionStep(...)##
+    //prediction step : own code
+    Matrix<2,1> u_ff_pred; // contains the same as uff_arr, but separate variable just in case navigationEnabled is False
+    u_ff_pred(0) = System.getGPinFloat(3);
+    u_ff_pred(1) = System.getGPinFloat(4);
+    
+    _ekf.PredictionStep(u_ff_pred);
+      
     //correction step
     //unless measurement is invalid
     if (System.getGPinInt(0)) {
-      ##implement correction step using _ekf.CorrectionStep(...)##
+      // own code
+      Matrix<2,1> y_meas;
+      y_meas(0) = _distance1->readCalibratedValue();
+      y_meas(1) = _distance2->readCalibratedValue();
+      
+      _ekf.CorrectionStep(y_meas);
     }
     
     //navigator
@@ -113,28 +123,30 @@ double Robot::wheelSpeedB()
 
 void Robot::resetKalmanFilter()
 {
-  const float Q[3][3] {  {##Q00##,       0,       0},
-                         {      0, ##Q11##,       0},
-                         {      0,       0, ##Q22##}
+  // these values have to be tuned: own code
+  const float Q[3][3] {  {1e-7   ,       0,       0},
+                         {      0, 1e-7   ,       0},
+                         {      0,       0, 1e-7   }
                       };
-  const float R[2][2] {  {##R00##,       0},
-                         {      0, ##R11##}
+  const float R[2][2] {  {1e-4   ,       0},
+                         {      0, 1e-4   }
                       };
-  const float P0[3][3] {  {##P00##,       0,       0},
-                          {      0, ##P11##,       0},
-                          {      0,       0, ##P22##}
+  const float P0[3][3] {  {1e-3   ,       0,       0},
+                          {      0, 1e-3   ,       0},
+                          {      0,       0, 1e-3   }
                        };
-  const float x0[3][1] {  {    ##X0##},
-                          {    ##Y0##},
-                          {##THETA0##}
+  // x0 , y0 , theta0: own code
+  const float x0[3][1] {  { 0 },
+                          { 0 },
+                          { 0 }
                        };
   _ekf.setQ(EkfCart::Q_t(Q)*_ekf.getTs());
   _ekf.setR(EkfCart::R_t(R));
   _ekf.setState(EkfCart::x_t(x0));
   _ekf.setStateCovariance(EkfCart::P_t(P0));
-  _ekf.setWallOne(1, 0, _distance1->readCalibratedValue() + ##alpha##);
-  _ekf.setWallTwo(0, 1, _distance2->readCalibratedValue() + ##gamma##);
-  _ekf.setCartParameters(##alpha##, ##beta##, ##gamma##);
+  _ekf.setWallOne(1, 0, _distance1->readCalibratedValue() + 0.0875); // alpha
+  _ekf.setWallTwo(0, 1, _distance2->readCalibratedValue() + 0.0855); // gamma
+  _ekf.setCartParameters(0.0875, 0.065, 0.0855); // alpha, beta, gamma
 }
 
 void Robot::resetNavigationController()
