@@ -18,10 +18,21 @@
 #define LED2_PIN 		40
 #define BATTERY_VOLTAGE	6000
 
+// Declaring variables
 float initial_distance;
 float relative_distance;
+float relative_distance_next;
+float absolute_distance;
+float real_distance;
+float error_distance;
 float RAD_TO_ENC; 
 float ENC_TO_RAD; 
+float RADIUS_WHEEL;
+
+// What function do you want to use?
+int function_speed_controller = 0;          // set to 1 if you want to use the speed controller alone
+int function_position_controller = 0;       // set to 1 if you want to use the position controller alone, uses speed controller too
+int function_position_fusion = 1;           // set to 1 if you want to use the function position fusion, uses all controllers
 
 
 Robot::Robot(uint8_t ID):
@@ -46,8 +57,6 @@ void Robot::init(){
   // reset position fusion functions
   reset_position_fusion();
   counter = 0.0;
-
-  
   
 }
 
@@ -62,22 +71,83 @@ void Robot::controllerHook(){
    int enc2_curr = _encoder2 ->readRawValue();
    float pos1_des = System.getGPinFloat(2);
    float pos2_des = System.getGPinFloat(3);
+
+
+   if(function_speed_controller == 1){
+        controller_speed(speed1_des, speed2_des);
+
+        // outputs: (don't forget to change names in QRoboticsCenter)
+        System.setGPoutFloat(0, uk_speed1[0]);
+        System.setGPoutFloat(1, speed1_des);
+        System.setGPoutFloat(2,(enc1_curr-enc1_prev)/Ts);
+
+        System.setGPoutFloat(4, uk_speed2[0]);
+        System.setGPoutFloat(5, speed2_des);
+        System.setGPoutFloat(6, (enc2_curr-enc2_prev)/Ts); 
+   }
+
    
-   controller_position(pos1_des, pos2_des);
-   
-   //System.setGPoutFloat(0, speed1_des);
-   System.setGPoutFloat(1,(enc1_curr-enc1_prev)/Ts);
-   System.setGPoutFloat(2, pos1_des);
-   System.setGPoutFloat(3, enc1_curr);
-   //System.setGPoutFloat(4, speed2_des);
-   System.setGPoutFloat(5, (enc2_curr-enc2_prev)/Ts);
-   System.setGPoutFloat(6, pos2_des);
-   System.setGPoutFloat(7, enc2_curr);
-   
+   if(function_position_controller == 1){
+        controller_position(pos1_des, pos2_des);
+
+        // outputs: (don't forget to change names in QRoboticsCenter)
+        System.setGPoutFloat(0, uk_speed1[0]);
+        System.setGPoutFloat(1,(enc1_curr-enc1_prev)/Ts);
+        System.setGPoutFloat(2, pos1_des);
+        System.setGPoutFloat(3, enc1_curr);
+        System.setGPoutFloat(4, uk_speed2[0]);
+        System.setGPoutFloat(5, (enc2_curr-enc2_prev)/Ts);
+        System.setGPoutFloat(6, pos2_des);
+        System.setGPoutFloat(7, enc2_curr);
+   }
+
+
+   if(function_position_fusion == 1){
+
+        // we need the position controller for this function, set the values of pos1_des and pos2_des 
+            // so that the cart drives straight forward.
+        controller_position(pos1_des, pos2_des);
+        
+        // changing values to [m] instead of [enc]
+            // all previous functions work in [enc] and measurement sensors are calibrated in [m]
+        float enc1_curr_m = enc1_curr*ENC_TO_RAD*RADIUS_WHEEL;
+        float enc1_prev_m = enc1_prev*ENC_TO_RAD*RADIUS_WHEEL;
+
+        // calling the function
+        float speed_cart = (enc1_curr_m-enc1_prev_m)/Ts;
+        position_sensor_fusion(speed_cart);  
+
+        // outputs: (don't forget to change names in QRoboticsCenter)
+        System.setGPoutFloat(0, initial_distance);            // state d
+        System.setGPoutFloat(1, relative_distance);           // state s|k
+        System.setGPoutFloat(2, speed_cart);                  // input v|k
+        System.setGPoutFloat(3, absolute_distance);           // output of state estimator
+        System.setGPoutFloat(4, real_distance);               // measurement of real distance
+        System.setGPoutFloat(5, error_distance);              // error between estimated and real distance
+        System.setGPoutFloat(6, enc1_curr_m);                 // current encoder value in [m], in case we need it
+        System.setGPoutFloat(7, enc1_prev_m);                 // previous encoder value in [m], in case we need it
+
+        // Shifting memory.
+        relative_distance = relative_distance_next;                        
+   }
+
+    
+   // Commented everything extra, so we know what we used for position controller
+   ////System.setGPoutFloat(0, speed1_des);
+   //System.setGPoutFloat(1,(enc1_curr-enc1_prev)/Ts);
+   //System.setGPoutFloat(2, pos1_des);
+   //System.setGPoutFloat(3, enc1_curr);
+   ////System.setGPoutFloat(4, speed2_des);
+   //System.setGPoutFloat(5, (enc2_curr-enc2_prev)/Ts);
+   //System.setGPoutFloat(6, pos2_des);
+   //System.setGPoutFloat(7, enc2_curr);
+
+
+   // shifting memory, is needed in every function
    enc1_prev = enc1_curr;
    enc2_prev = enc2_curr;
 
-   System.setGPoutInt(0, enc1_curr - enc2_curr);
+   //System.setGPoutInt(0, enc1_curr - enc2_curr);
     
 	} else {
 		//set motor voltage to zero or it will keep on running...
@@ -85,6 +155,7 @@ void Robot::controllerHook(){
     _motor2 -> setBridgeVoltage(0); // set motor2 voltage to 0V
     // reset controller so that it does not do crazy things when we restart it
     reset_controller();
+    reset_position_fusion();
     counter = 0.0;
 	}
 }
@@ -95,13 +166,18 @@ void Robot::position_sensor_fusion(float speed_cart)
   /**
    * This is the code for the position sensor fusion.
    * Here we read the outputs of the sensors and compare them to the estimated (position)state of the cart.
+   * For this to work, you have to set the values of the position controller such that the cart drives forward.
    */
 
    float relative_distance_next = relative_distance + Ts*speed_cart;  // This is the second line of the state equations, first line is d = d.
 
    float absolute_distance = initial_distance + relative_distance;    // This is the output equation.
 
-   
+   float real_distance = _distance1->readCalibratedValue();           // This is the real distance the front sensor reads out.
+
+   float error_distance = real_distance - absolute_distance;          // This is the error between the estimated and the real distance.
+
+   // all outputs are set in the controllerHook()
 }
 
 
@@ -153,6 +229,7 @@ void Robot::controller_position(float pos1_des, float pos2_des)
   if(speed2_des > 2300) { speed2_des = 2300; }
   if(speed2_des < -2300) { speed2_des = -2300; }
 
+  // Outputs are copied to controllerHook()
   //System.setGPoutFloat(1,speed1_des);
   //System.setGPoutFloat(5,speed2_des);
 
@@ -204,9 +281,9 @@ void Robot::controller_speed(float speed1_des, float speed2_des)
   if(uk_speed2[0] > 6000) { uk_speed2[0] = 6000; }
   if(uk_speed2[0] < -6000) { uk_speed2[0] = -6000; }
 
-  // show control signal
-  System.setGPoutFloat(0, uk_speed1[0]);
-  System.setGPoutFloat(4, uk_speed2[0]);
+  // show control signal    (copied to controllerHook())
+  // System.setGPoutFloat(0, uk_speed1[0]);
+  // System.setGPoutFloat(4, uk_speed2[0]);
 
   // drive the motors with the calculated values
   _motor1->setBridgeVoltage((int)uk_speed1[0]);
@@ -241,10 +318,10 @@ void Robot::reset_position_fusion()
    */
    
     initial_distance = _distance1->readCalibratedValue();
-    relative_distance = 0.0;
+    relative_distance = 0.0;    // [m]
     RAD_TO_ENC = ((34.0*11.0*2.0)/(2*3.141593));
     ENC_TO_RAD = 1/RAD_TO_ENC;
-    
+    RADIUS_WHEEL = 0.01;         // [m]
     
 }
 
