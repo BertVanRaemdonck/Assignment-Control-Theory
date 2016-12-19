@@ -29,6 +29,7 @@ float RAD_TO_ENC;
 float ENC_TO_RAD; 
 float RADIUS_WHEEL;
 
+
 // What function do you want to use?
 int function_speed_controller = 0;          // set to 1 if you want to use the speed controller alone
 int function_position_controller = 0;       // set to 1 if you want to use the position controller alone, uses speed controller too
@@ -126,6 +127,7 @@ void Robot::controllerHook(){
         System.setGPoutFloat(5, error_distance);              // error between estimated and real distance
         System.setGPoutFloat(6, enc1_curr_m);                 // current encoder value in [m], in case we need it
         System.setGPoutFloat(7, enc1_prev_m);                 // previous encoder value in [m], in case we need it
+        System.setGPoutInt(0, enc1_curr);                     // encoder value of motor 1 in [enc]
 
         // Shifting memory.
         relative_distance = relative_distance_next;                        
@@ -169,13 +171,13 @@ void Robot::position_sensor_fusion(float speed_cart)
    * For this to work, you have to set the values of the position controller such that the cart drives forward.
    */
 
-   float relative_distance_next = relative_distance + Ts*speed_cart;  // This is the second line of the state equations, first line is d = d.
+   relative_distance_next = relative_distance + Ts*speed_cart;  // This is the second line of the state equations, first line is d = d.
 
-   float absolute_distance = initial_distance + relative_distance;    // This is the output equation.
+   absolute_distance = initial_distance + relative_distance;    // This is the output equation.
 
-   float real_distance = _distance1->readCalibratedValue();           // This is the real distance the front sensor reads out.
+   real_distance = _distance1->readCalibratedValue();           // This is the real distance the front sensor reads out.
 
-   float error_distance = real_distance - absolute_distance;          // This is the error between the estimated and the real distance.
+   error_distance = real_distance - absolute_distance;          // This is the error between the estimated and the real distance.
 
    // all outputs are set in the controllerHook()
 }
@@ -319,9 +321,9 @@ void Robot::reset_position_fusion()
    
     initial_distance = _distance1->readCalibratedValue();
     relative_distance = 0.0;    // [m]
-    RAD_TO_ENC = ((34.0*11.0*2.0)/(2*3.141593));
+    RAD_TO_ENC = 0.5*((34.0*11.0*2.0)/(2*3.141593));
     ENC_TO_RAD = 1/RAD_TO_ENC;
-    RADIUS_WHEEL = 0.01;         // [m]
+    RADIUS_WHEEL = 0.032;         // [m]
     
 }
 
