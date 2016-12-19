@@ -6,11 +6,17 @@
 void NavigationController::setCartParameters(const float a_) {
   a = a_;
 
-  //T1: transformation matrix [v; w] -> [v_left; v_right]
-  ##Determine T1 based on a##
+  //T1: transformation matrix [v; w] -> [v_left; v_right], own code
+  T1(0,0) = 1;
+  T1(0,1) = -a;
+  T1(1,0) = 1;
+  T1(1,1) = a;
 
-  //T2: transformation matrix [v_left; v_right] -> [v; w]
-  ##Determine T2 based on a##
+  //T2: transformation matrix [v_left; v_right] -> [v; w], own code
+  T2(0,0) = 1/2;
+  T2(0,1) = 1/2;
+  T2(1,0) = -1/(2*a);
+  T2(1,1) = 1/(2*a);
 }
 
 void NavigationController::setFeedbackGainMatrix(const Matrix<2, 3>& Kfb_) {

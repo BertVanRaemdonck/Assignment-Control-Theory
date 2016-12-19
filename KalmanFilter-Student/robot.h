@@ -49,6 +49,31 @@ class Robot
     // Navigation controller
     NavigationController _nav;
 
+
+    // \begin{own code}
+
+    // Sampling time
+    float Ts = 0.01;
+    
+    // Memory of the speed controller
+    int enc1_prev = 0;
+    int enc2_prev = 0;
+    
+    float ek_speed1[2] = {0.0, 0.0};
+    float uk_speed1[2] = {0.0, 0.0};
+    
+    float ek_speed2[2] = {0.0, 0.0};
+    float uk_speed2[2] = {0.0, 0.0};
+  
+    // Parameters of the speed controller
+    float num_contr_speed1[2] = {3.5460, -2.3770};
+    float den_contr_speed1[2] = {1.0, -1.0}; 
+  
+    float num_contr_speed2[2] = {4.1780, -3.1331};
+    float den_contr_speed2[2] = {1.0, -1.0};
+
+    // \end{own code}
+
   public:
     Robot(uint8_t ID = 0);
 
@@ -66,6 +91,12 @@ class Robot
     void velocityControlUpdate(double setpoint_left, double setpoint_right); //update motor speed
 
     double wrap2pi(double angle);
+
+    // \begin{own code}
+    void controller_speed(float, float);
+    void reset_controller();
+    int unwrap(int, int);
+    // \end{own code}
 
     ///////
     /// SET

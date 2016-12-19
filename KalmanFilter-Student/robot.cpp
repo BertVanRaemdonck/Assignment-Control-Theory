@@ -41,18 +41,26 @@ void Robot::init() {
   //initialize the robot - sort of starting procedure
   resetKalmanFilter();
   resetEncoders();
+  // own code
+  reset_controller();
 }
 
 double _error_integrator = 0;
 
 void Robot::controllerHook() {
+  // \begin{own code}
+  int enc1_curr = _encoder1 ->readRawValue();
+  int enc2_curr = _encoder2 ->readRawValue();
+  // \end{own code}
+  
+  
   //do something that is periodic
   //update speed sensors
   _speed1->readCalibratedValue();
   _speed2->readCalibratedValue();
 
   //Kalman filtering
-  if (KalmanFilterEnabled()) {
+  if (KalmanFilterEnabled()) { // press button 1 to toggle
     //prediction step : own code
     Matrix<2,1> u_ff_pred; // contains the same as uff_arr, but separate variable just in case navigationEnabled is False
     u_ff_pred(0) = System.getGPinFloat(3);
@@ -62,7 +70,7 @@ void Robot::controllerHook() {
       
     //correction step
     //unless measurement is invalid
-    if (System.getGPinInt(0)) {
+    if (System.getGPinInt(0)) { 
       // own code
       Matrix<2,1> y_meas;
       y_meas(0) = _distance1->readCalibratedValue();
@@ -72,7 +80,7 @@ void Robot::controllerHook() {
     }
     
     //navigator
-    if (navigationEnabled()) {
+    if (navigationEnabled()) { // press button 2 to toggle
       //compute feedback
       float xref_arr [3][1] = { {System.getGPinFloat(0)}, {System.getGPinFloat(1)}, {System.getGPinFloat(2)} };
       float uff_arr [2][1] = { {System.getGPinFloat(3)}, {System.getGPinFloat(4)} };
@@ -81,10 +89,23 @@ void Robot::controllerHook() {
       NavigationController::u_t vLR = _nav.ControlToWheelSpeeds(unav);
       velocityControlUpdate(vLR(0), vLR(1));
     } else {
+
+      // put speed controller here, I guess
+      // \begin{own code}
+
+      // transform feedforward inputs into speed for left and right motor (could use the matrices, but this is easier)
+      v_left = u_ff_pred(0) - 0.1695/2.0*u_ff_pred(1);  // [m/s]
+      v_right = u_ff_pred(0) + 0.1695/2.0*u_ff_pred(1); // [m/s]
+
+      // call speed controller with values in right units
+      
+      // \end{own code}
+      
       _motor1->setBridgeVoltage(0);
       _motor2->setBridgeVoltage(0);
     }
   } else {
+    reset_controller(); // own code
     _motor1->setBridgeVoltage(0);
     _motor2->setBridgeVoltage(0);
   }
@@ -103,6 +124,11 @@ void Robot::controllerHook() {
   System.setGPoutFloat(5, _ekf.getState(0));
   System.setGPoutFloat(6, _ekf.getState(1));
   System.setGPoutFloat(7, _ekf.getState(2));
+
+  // \begin{own code}
+  enc1_prev = enc1_curr;
+  enc2_prev = enc2_curr;
+  // \end{own code}
 }
 
 void Robot::resetEncoders()
@@ -151,7 +177,7 @@ void Robot::resetKalmanFilter()
 
 void Robot::resetNavigationController()
 {
-  _nav.setCartParameters(##half wheel base##);
+  _nav.setCartParameters(0.1695/2.0); // own code: measured value for a
   const float Kfb[2][3] { {##kx##,      0,          0},
                           {     0, ##ky##, ##ktheta##}
                         };
@@ -274,3 +300,100 @@ void Robot::velocityControlUpdate(double setpoint_left, double setpoint_right)
   _motor1->setBridgeVoltage(motor1_voltage);
   _motor2->setBridgeVoltage(motor2_voltage);
 }
+
+
+
+// own code for speed controller
+
+void Robot::controller_speed(float speed1_des, float speed2_des)
+{
+   /**
+   * This is the implemented velocity controller.
+   * This can be used to control the velocity of the motors seperatly.
+   */
+
+   // MAKE IT WORK WITH METERS ETC!!!!!!!
+   
+  // read encoder values
+  int enc1 = _encoder1 ->readRawValue();
+  int enc2 = _encoder2 ->readRawValue();
+
+  // unwrap encoder values
+  enc1 = unwrap(enc1, enc1_prev);
+  enc2 = unwrap(enc2, enc2_prev);  
+
+  // calculate new speed
+  float speed1_act = (enc1 - enc1_prev)/Ts;
+  float speed2_act = (enc2 - enc2_prev)/Ts;
+
+  // shift memories
+  for(int i = 1; i > 0; i--){
+    ek_speed1[i] = ek_speed1[i-1];
+    uk_speed1[i] = uk_speed1[i-1];
+    ek_speed2[i] = ek_speed2[i-1];
+    uk_speed2[i] = uk_speed2[i-1];
+  }
+
+  // calculate new tracking error
+  ek_speed1[0] = speed1_des - speed1_act;
+  ek_speed2[0] = speed2_des - speed2_act; 
+
+  // compute the new voltages to be sent to the motors
+  uk_speed1[0] = 1/(den_contr_speed1[0]) * (-den_contr_speed1[1]*uk_speed1[1] + num_contr_speed1[0]*ek_speed1[0] + num_contr_speed1[1]*ek_speed1[1]);
+  uk_speed2[0] = 1/(den_contr_speed2[0]) * (-den_contr_speed2[1]*uk_speed2[1] + num_contr_speed2[0]*ek_speed2[0] + num_contr_speed2[1]*ek_speed2[1]); 
+
+  // clip output of the controllers to allowed voltages
+  if(uk_speed1[0] > 6000) { uk_speed1[0] = 6000; }
+  if(uk_speed1[0] < -6000) { uk_speed1[0] = -6000; }
+  if(uk_speed2[0] > 6000) { uk_speed2[0] = 6000; }
+  if(uk_speed2[0] < -6000) { uk_speed2[0] = -6000; }
+
+  // show control signal    (copied to controllerHook())
+  // System.setGPoutFloat(0, uk_speed1[0]);
+  // System.setGPoutFloat(4, uk_speed2[0]);
+
+  // drive the motors with the calculated values
+  _motor1->setBridgeVoltage((int)uk_speed1[0]);
+  _motor2->setBridgeVoltage((int)uk_speed2[0]);
+  
+}
+  
+int Robot::unwrap(int curr_val, int prev_val){
+  /**
+   * Unwraps the values of the encoder if needed.
+   * Used to avoid sudden changes in encoder values 
+   *    due to the limited number of encoder values.
+   */
+   
+  // unwraps two succeeding values
+  if (curr_val - prev_val > 32768){
+    curr_val = curr_val - 65536;
+  }
+  else if (curr_val - prev_val < -32768){
+    curr_val = curr_val + 65536;
+  }
+  return curr_val;
+}
+
+void Robot::reset_controller()
+{
+  /**
+   * Resets the controller input and output values to zero.
+   * This is to avoid weird behaviour, due to transient respons of the wrong input, 
+   *    when the controller restarts.
+   */
+   
+    // loop over indices 0-2 to set all registers to zero
+    for(int k=0;k<2;k++){
+        ek_speed1[k] = 0.0;
+        uk_speed1[k] = 0.0;
+        ek_speed2[k] = 0.0;
+        uk_speed2[k] = 0.0;
+
+        ek_pos1[k] = 0.0;
+        uk_pos1[k] = 0.0;
+        ek_pos2[k] = 0.0;
+        uk_pos2[k] = 0.0;
+    }    
+}
+
