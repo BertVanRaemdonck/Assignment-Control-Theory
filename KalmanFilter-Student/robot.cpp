@@ -21,6 +21,11 @@
 
 #define RAD_TO_ENC ((34.0*11.0*2.0) / (2.0*3.141593))
 
+// defining own variables
+float RADIUS_WHEEL = 0.0325; // [m] see function wheelSpeedA()
+float speed1_des;
+float speed2_des;
+
 Robot::Robot(uint8_t ID):
   _ID(ID),
   _type(20),
@@ -98,6 +103,12 @@ void Robot::controllerHook() {
       v_right = u_ff_pred(0) + 0.1695/2.0*u_ff_pred(1); // [m/s]
 
       // call speed controller with values in right units
+
+      speed1_des = (v_left * RAD_TO_ENC)/RADIUS_WHEEL;
+      speed2_des = (v_right * RAD_TO_ENC)/RADIUS_WHEEL;
+      
+      
+      controller_speed(speed1_des, speed2_des);
       
       // \end{own code}
       
@@ -294,8 +305,27 @@ void Robot::velocityControlUpdate(double setpoint_left, double setpoint_right)
     setpoint_right = -MAXIMUM_CART_VELOCITY;
   }
 
-  int16_t motor1_voltage = ##Call your speed controller for left wheel which you already designed##
-  int16_t motor2_voltage = ##Call your speed controller for right wheel which you already designed##
+
+  // put speed controller here, I guess (Ben)
+      // \begin{own code}
+
+      // transform feedforward inputs into speed for left and right motor (could use the matrices, but this is easier)
+      v_left = setpoint_left;  // [m/s]
+      v_right = setpoint_right; // [m/s]
+
+      // call speed controller with values in right units
+
+      speed1_des = (v_left * RAD_TO_ENC)/RADIUS_WHEEL;
+      speed2_des = (v_right * RAD_TO_ENC)/RADIUS_WHEEL;
+      
+      
+      controller_speed(speed1_des, speed2_des);
+      
+      // \end{own code}
+  
+
+  int16_t motor1_voltage = uk_speed1[0];  // ##Call your speed controller for left wheel which you already designed##
+  int16_t motor2_voltage = uk_speed2[0]   // ##Call your speed controller for right wheel which you already designed##
 
   _motor1->setBridgeVoltage(motor1_voltage);
   _motor2->setBridgeVoltage(motor2_voltage);
@@ -313,6 +343,8 @@ void Robot::controller_speed(float speed1_des, float speed2_des)
    */
 
    // MAKE IT WORK WITH METERS ETC!!!!!!!
+   // OR MAYBE LIKE I JUST DID? JUST SET THE VALUES TO ENC/S
+   // OR DO WE HAVE TO USE THE FUNCTION ABOVE???
    
   // read encoder values
   int enc1 = _encoder1 ->readRawValue();
