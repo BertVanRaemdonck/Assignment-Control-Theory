@@ -94,7 +94,7 @@ class Robot
 
     // \begin{own code}
     void controller_speed(float, float);
-    void reset_controller();
+    void resetVelocityControl();
     int unwrap(int, int);
     // \end{own code}
 

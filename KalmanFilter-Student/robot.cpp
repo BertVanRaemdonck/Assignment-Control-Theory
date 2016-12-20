@@ -23,8 +23,6 @@
 
 // defining own variables
 float RADIUS_WHEEL = 0.0325; // [m] see function wheelSpeedA()
-float speed1_des;
-float speed2_des;
 
 Robot::Robot(uint8_t ID):
   _ID(ID),
@@ -47,7 +45,7 @@ void Robot::init() {
   resetKalmanFilter();
   resetEncoders();
   // own code
-  reset_controller();
+  resetVelocityControl();
 }
 
 double _error_integrator = 0;
@@ -94,29 +92,20 @@ void Robot::controllerHook() {
       NavigationController::u_t vLR = _nav.ControlToWheelSpeeds(unav);
       velocityControlUpdate(vLR(0), vLR(1));
     } else {
-
-      // put speed controller here, I guess
       // \begin{own code}
-
-      // transform feedforward inputs into speed for left and right motor (could use the matrices, but this is easier)
-      v_left = u_ff_pred(0) - 0.1695/2.0*u_ff_pred(1);  // [m/s]
-      v_right = u_ff_pred(0) + 0.1695/2.0*u_ff_pred(1); // [m/s]
-
-      // call speed controller with values in right units
-
-      speed1_des = (v_left * RAD_TO_ENC)/RADIUS_WHEEL;
-      speed2_des = (v_right * RAD_TO_ENC)/RADIUS_WHEEL;
-      
-      
-      controller_speed(speed1_des, speed2_des);
-      
+      // just drive the cart with the feedforward velocity
+      float uff_arr [2][1] = { {System.getGPinFloat(3)}, {System.getGPinFloat(4)} };
+      NavigationController::u_t vLR = _nav.ControlToWheelSpeeds(uff_arr);
+      velocityControlUpdate(vLR(0), vLR(1));      
       // \end{own code}
-      
+
+      /*
       _motor1->setBridgeVoltage(0);
       _motor2->setBridgeVoltage(0);
+      */
     }
   } else {
-    reset_controller(); // own code
+    resetVelocityControl(); // own code
     _motor1->setBridgeVoltage(0);
     _motor2->setBridgeVoltage(0);
   }
@@ -129,12 +118,17 @@ void Robot::controllerHook() {
   // float outputs
   System.setGPoutFloat(0, -wheelSpeedA());
   System.setGPoutFloat(1, wheelSpeedB());
-  System.setGPoutFloat(2, _ekf.getStateStandardDeviation(0));
-  System.setGPoutFloat(3, _ekf.getStateStandardDeviation(1));
-  System.setGPoutFloat(4, _ekf.getStateStandardDeviation(2));
+  //System.setGPoutFloat(2, _ekf.getStateStandardDeviation(0));
+  //System.setGPoutFloat(3, _ekf.getStateStandardDeviation(1));
+  //System.setGPoutFloat(4, _ekf.getStateStandardDeviation(2));
   System.setGPoutFloat(5, _ekf.getState(0));
   System.setGPoutFloat(6, _ekf.getState(1));
   System.setGPoutFloat(7, _ekf.getState(2));
+
+  //own code
+  System.setGPoutFloat(2, System.getGPinFloat(0)); // x_ff
+  System.setGPoutFloat(3, System.getGPinFloat(1)); // y_ff
+  System.setGPoutFloat(4, System.getGPinFloat(2)); // theta _ff
 
   // \begin{own code}
   enc1_prev = enc1_curr;
@@ -188,11 +182,12 @@ void Robot::resetKalmanFilter()
 
 void Robot::resetNavigationController()
 {
-  _nav.setCartParameters(0.1695/2.0); // own code: measured value for a
-  const float Kfb[2][3] { {##kx##,      0,          0},
-                          {     0, ##ky##, ##ktheta##}
-                        };
-  _nav.setFeedbackGainMatrix(NavigationController::K_t(Kfb));
+  // still need to fill in!
+//  _nav.setCartParameters(0.1695/2.0); // own code: measured value for a
+//  const float Kfb[2][3] { {##kx##,      0,          0},
+//                          {     0, ##ky##, ##ktheta##}
+//                        };
+//  _nav.setFeedbackGainMatrix(NavigationController::K_t(Kfb));
 }
 
 double Robot::wrap2pi(double angle)
@@ -305,30 +300,27 @@ void Robot::velocityControlUpdate(double setpoint_left, double setpoint_right)
     setpoint_right = -MAXIMUM_CART_VELOCITY;
   }
 
+  // \begin{own code}
 
-  // put speed controller here, I guess (Ben)
-      // \begin{own code}
-
-      // transform feedforward inputs into speed for left and right motor (could use the matrices, but this is easier)
-      v_left = setpoint_left;  // [m/s]
-      v_right = setpoint_right; // [m/s]
-
-      // call speed controller with values in right units
-
-      speed1_des = (v_left * RAD_TO_ENC)/RADIUS_WHEEL;
-      speed2_des = (v_right * RAD_TO_ENC)/RADIUS_WHEEL;
-      
-      
-      controller_speed(speed1_des, speed2_des);
-      
-      // \end{own code}
+  // convert speeds to [enc/s] because that's how our speed controller works
+  double speed1_des_double = (setpoint_left * 2.0 * RAD_TO_ENC)/RADIUS_WHEEL;
+  double speed2_des_double = (setpoint_right * 2.0 * RAD_TO_ENC)/RADIUS_WHEEL;
+  // convert desired speeds to floats because that's how our speed controller works
+  float speed1_des = (float) speed1_des_double;
+  float speed2_des = (float) speed2_des_double;
+  // call the speed controller with the converted speeds      
+  controller_speed(speed1_des, speed2_des);
   
-
+  // \end{own code}
+  
+  /* not needed because speed gets written to the motors within the controller function itself
+   
   int16_t motor1_voltage = uk_speed1[0];  // ##Call your speed controller for left wheel which you already designed##
   int16_t motor2_voltage = uk_speed2[0]   // ##Call your speed controller for right wheel which you already designed##
-
+  
   _motor1->setBridgeVoltage(motor1_voltage);
   _motor2->setBridgeVoltage(motor2_voltage);
+  */
 }
 
 
@@ -341,10 +333,6 @@ void Robot::controller_speed(float speed1_des, float speed2_des)
    * This is the implemented velocity controller.
    * This can be used to control the velocity of the motors seperatly.
    */
-
-   // MAKE IT WORK WITH METERS ETC!!!!!!!
-   // OR MAYBE LIKE I JUST DID? JUST SET THE VALUES TO ENC/S
-   // OR DO WE HAVE TO USE THE FUNCTION ABOVE???
    
   // read encoder values
   int enc1 = _encoder1 ->readRawValue();
@@ -407,7 +395,7 @@ int Robot::unwrap(int curr_val, int prev_val){
   return curr_val;
 }
 
-void Robot::reset_controller()
+void Robot::resetVelocityControl()
 {
   /**
    * Resets the controller input and output values to zero.
@@ -422,10 +410,10 @@ void Robot::reset_controller()
         ek_speed2[k] = 0.0;
         uk_speed2[k] = 0.0;
 
-        ek_pos1[k] = 0.0;
-        uk_pos1[k] = 0.0;
-        ek_pos2[k] = 0.0;
-        uk_pos2[k] = 0.0;
+        //ek_pos1[k] = 0.0;
+        //uk_pos1[k] = 0.0;
+        //ek_pos2[k] = 0.0;
+        //uk_pos2[k] = 0.0;
     }    
 }
 

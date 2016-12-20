@@ -27,7 +27,8 @@ Matrix<2, 1> NavigationController::Controller(const Matrix<3, 1>& x, const Matri
   Matrix<2, 1> u;
 
   // Feedback term
-  ##Compute feedback for global navigation using Kfb (the state feedback gain in local cart frame)##
+  // still need to fill in
+  //##Compute feedback for global navigation using Kfb (the state feedback gain in local cart frame)##
 
   // Add feed-forward term
   u += uff;
