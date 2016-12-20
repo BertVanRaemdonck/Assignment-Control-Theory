@@ -139,4 +139,5 @@ plot(x_est(1,:), x_est(2,:));
 hold off
 legend('actual', 'estimated')
 
-
+figure
+plot(t, u_ref(2,:))

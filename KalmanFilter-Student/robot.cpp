@@ -65,11 +65,9 @@ void Robot::controllerHook() {
   //Kalman filtering
   if (KalmanFilterEnabled()) { // press button 1 to toggle
     //prediction step : own code
-    Matrix<2,1> u_ff_pred; // contains the same as uff_arr, but separate variable just in case navigationEnabled is False
-    u_ff_pred(0) = System.getGPinFloat(3);
-    u_ff_pred(1) = System.getGPinFloat(4);
+    float u_ff_pred [2][1] = { {System.getGPinFloat(3)}, {System.getGPinFloat(4)} }; // contains the same as uff_arr, but separate variable just in case navigationEnabled is False
     
-    _ekf.PredictionStep(u_ff_pred);
+    _ekf.PredictionStep(NavigationController::u_t(u_ff_pred));
       
     //correction step
     //unless measurement is invalid
@@ -95,19 +93,13 @@ void Robot::controllerHook() {
   
     } else {
       // \begin{own code}
-      // just drive the cart with the feedforward velocity
-      //float uff_arr [2][1] = { {System.getGPinFloat(3)}, {System.getGPinFloat(4)} };
-
-      //NavigationController::u_t uff_arr;
-      //uff_arr(0) = System.getGPinFloat(3);
-      //uff_arr(1) = System.getGPinFloat(4);
-      
-      NavigationController::u_t vLR = _nav.ControlToWheelSpeeds(u_ff_pred);
+      // just drive the cart with the feedforward velocity     
+      NavigationController::u_t vLR = _nav.ControlToWheelSpeeds(NavigationController::u_t(u_ff_pred));
       velocityControlUpdate(-vLR(0), vLR(1));    
 
       //System.setGPoutFloat(0, uff_arr(0));
       //System.setGPoutFloat(1, uff_arr(1));
-      System.setGPoutFloat(2, u_ff_pred(1));
+      System.setGPoutFloat(2, u_ff_pred[0][1]);
       
       // \end{own code}
 
