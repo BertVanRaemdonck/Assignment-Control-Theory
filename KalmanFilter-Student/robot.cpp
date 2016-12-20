@@ -99,7 +99,7 @@ void Robot::controllerHook() {
 
       //System.setGPoutFloat(0, uff_arr(0));
       //System.setGPoutFloat(1, uff_arr(1));
-      System.setGPoutFloat(2, u_ff_pred[0][1]);
+      //System.setGPoutFloat(2, u_ff_pred[0][1]);
       
       // \end{own code}
 
@@ -121,8 +121,8 @@ void Robot::controllerHook() {
   System.setGPoutInt(2, System.getGPinInt(0));
 
   // float outputs
-  //System.setGPoutFloat(0, -wheelSpeedA());
-  //System.setGPoutFloat(1, wheelSpeedB());
+  System.setGPoutFloat(0, -wheelSpeedA());
+  System.setGPoutFloat(1, wheelSpeedB());
   //System.setGPoutFloat(2, _ekf.getStateStandardDeviation(0));
   //System.setGPoutFloat(3, _ekf.getStateStandardDeviation(1));
   //System.setGPoutFloat(4, _ekf.getStateStandardDeviation(2));
@@ -132,7 +132,7 @@ void Robot::controllerHook() {
 
   //own code
   
-  //System.setGPoutFloat(2, System.getGPinFloat(0)); // x_ff
+  System.setGPoutFloat(2, System.getGPinFloat(0)); // x_ff
   System.setGPoutFloat(3, System.getGPinFloat(1)); // y_ff
   System.setGPoutFloat(4, System.getGPinFloat(2)); // theta _ff
 
