@@ -321,9 +321,9 @@ void Robot::reset_position_fusion()
    
     initial_distance = _distance1->readCalibratedValue();
     relative_distance = 0.0;    // [m]
-    RAD_TO_ENC = 0.5*((34.0*11.0*2.0)/(2*3.141593));
+    RAD_TO_ENC = 2*((34.0*11.0*2.0)/(2*3.141593));
     ENC_TO_RAD = 1/RAD_TO_ENC;
-    RADIUS_WHEEL = 0.032;         // [m]
+    RADIUS_WHEEL = 0.0325;      // [m]
     
 }
 
