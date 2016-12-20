@@ -98,15 +98,17 @@ void Robot::controllerHook() {
       // just drive the cart with the feedforward velocity
       //float uff_arr [2][1] = { {System.getGPinFloat(3)}, {System.getGPinFloat(4)} };
 
-      NavigationController::u_t uff_arr;
-      uff_arr(0) = System.getGPinFloat(3);
-      uff_arr(1) = System.getGPinFloat(4);
+      //NavigationController::u_t uff_arr;
+      //uff_arr(0) = System.getGPinFloat(3);
+      //uff_arr(1) = System.getGPinFloat(4);
       
-      NavigationController::u_t vLR = _nav.ControlToWheelSpeeds(uff_arr);
+      NavigationController::u_t vLR = _nav.ControlToWheelSpeeds(u_ff_pred);
       velocityControlUpdate(-vLR(0), vLR(1));    
 
-      System.setGPoutFloat(0, uff_arr(0));
-      System.setGPoutFloat(1, uff_arr(1));
+      //System.setGPoutFloat(0, uff_arr(0));
+      //System.setGPoutFloat(1, uff_arr(1));
+      System.setGPoutFloat(2, u_ff_pred(1));
+      
       // \end{own code}
 
       /*
@@ -137,7 +139,8 @@ void Robot::controllerHook() {
   System.setGPoutFloat(7, _ekf.getState(2));
 
   //own code
-  System.setGPoutFloat(2, System.getGPinFloat(0)); // x_ff
+  
+  //System.setGPoutFloat(2, System.getGPinFloat(0)); // x_ff
   System.setGPoutFloat(3, System.getGPinFloat(1)); // y_ff
   System.setGPoutFloat(4, System.getGPinFloat(2)); // theta _ff
 
@@ -322,6 +325,10 @@ void Robot::velocityControlUpdate(double setpoint_left, double setpoint_right)
   }
 
   // \begin{own code}
+
+
+  System.setGPoutFloat(0, setpoint_left);
+  System.setGPoutFloat(1, setpoint_right);
 
   // convert speeds to [enc/s] because that's how our speed controller works
   double speed1_des_double = (setpoint_left * 2.0 * RAD_TO_ENC)/RADIUS_WHEEL;
