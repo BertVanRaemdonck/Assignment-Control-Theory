@@ -145,7 +145,7 @@ plot(t, u_ref(2,:))
 
 % ============================== Experiment ===============================
 
-rec = readlog('log_gpio_feed_forward_trajectory.xml');
+rec = readlog('log_gpio_feed_forward_test1.xml');
 
 t_input = rec.getData('time');
 vA = rec.getData('wheel_speedA');
@@ -156,18 +156,18 @@ theta_ref = rec.getData('theta_ref');
 x_kalman = rec.getData('x_kalman');
 y_kalman = rec.getData('y_kalman');
 theta_kalman = rec.getData('theta_kalman');
-meas_valid = rec.getData('Voltage');
+meas_valid = rec.getData('meas_valid');
 
 figure
 subplot(3,1,1)
 plot(x_kalman)
-axis([590 2350 min(x_kalman(590:2350)) max(x_kalman(590:2350))])
+%axis([590 2350 min(x_kalman(590:2350)) max(x_kalman(590:2350))])
 subplot(3,1,2)
 plot(y_kalman)
-axis([590 2350 min(y_kalman(590:2350)) max(y_kalman(590:2350))])
+%axis([590 2350 min(y_kalman(590:2350)) max(y_kalman(590:2350))])
 subplot(3,1,3)
 plot(x_ref)
-axis([590 2350 -Inf Inf])
+%axis([590 2350 -Inf Inf])
 hold on
 plot(y_ref)
 hold off
@@ -175,9 +175,12 @@ hold off
 figure
 subplot(2,1,1)
 plot(x_kalman)
+hold on
+plot(y_kalman)
+hold off
 subplot(2,1,2)
 plot(meas_valid)
 
 figure
 plot(x_kalman, y_kalman)
-axis([min(x_kalman(590:2350)) max(x_kalman(590:2350)) min(y_kalman(590:2350)) max(y_kalman(590:2350))])
+%axis([min(x_kalman(590:2350)) max(x_kalman(590:2350)) min(y_kalman(590:2350)) max(y_kalman(590:2350))])

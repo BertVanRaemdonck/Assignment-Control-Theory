@@ -19,9 +19,9 @@
 		<value>x_kalman</value>
 		<value>y_kalman</value>
 		<value>theta_kalman</value>
-		<value>Encoder1</value>
-		<value>Encoder2</value>
-		<value>Voltage</value>
+		<value>Voltage_1</value>
+		<value>Voltage_2</value>
+		<value>meas_valid</value>
 		<value>IntIn3</value>
 	</labels>
 	<data>

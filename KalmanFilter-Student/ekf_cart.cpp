@@ -32,8 +32,8 @@ EkfCart::y_t EkfCart::hfun(const x_t& x) const {
   //implement measurement model: own code
   Matrix<2,1> y;
   
-  y(0) = ( weq1(0)*(x(0)+alpha) + weq1(1)*x(1)         - weq1(2) ) / sqrt( pow(weq1(0),2) + pow(weq1(1),2) ) ;
-  y(1) = ( weq2(0)*(x(0)-beta)  + weq2(1)*(x(1)+gamma) - weq2(2) ) / sqrt( pow(weq2(0),2) + pow(weq2(1),2) ) ;
+  y(0) = ( weq1(0)*(x(0)-alpha) + weq1(1)*x(1)         - weq1(2) ) / sqrt( pow(weq1(0),2) + pow(weq1(1),2) ) ;
+  y(1) = ( weq2(0)*(x(0)+beta)  + weq2(1)*(x(1)-gamma) - weq2(2) ) / sqrt( pow(weq2(0),2) + pow(weq2(1),2) ) ;
 
   return y;
 }

@@ -16,7 +16,7 @@ alpha = 0.0875;
 beta = 0.065;
 gamma = 0.0855;
 
-y =  [((a1*(x(1)+alpha))+(b1*x(2))-c1)/sqrt((a1^2)+(b1^2));
-      ((a2*(x(1)-beta))+(b2*(x(2)+gamma))-c2)/sqrt((a2^2)+(b2^2))];
+y =  [((a1*(x(1)-alpha))+(b1*x(2))-c1)/sqrt((a1^2)+(b1^2));
+      ((a2*(x(1)+beta))+(b2*(x(2)-gamma))-c2)/sqrt((a2^2)+(b2^2))];
 end
 

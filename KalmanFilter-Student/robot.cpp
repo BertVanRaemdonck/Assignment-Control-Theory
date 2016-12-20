@@ -165,12 +165,12 @@ void Robot::resetKalmanFilter()
                          {      0, 1e-7   ,       0},
                          {      0,       0, 1e-7   }
                       };
-  const float R[2][2] {  {1e-4   ,       0},
-                         {      0, 1e-4   }
+  const float R[2][2] {  {1e-10   ,       0},
+                         {      0, 1e-10   }
                       };
-  const float P0[3][3] {  {1e-3   ,       0,       0},
-                          {      0, 1e-3   ,       0},
-                          {      0,       0, 1e-3   }
+  const float P0[3][3] {  {1e-7   ,       0,       0},
+                          {      0, 1e-7   ,       0},
+                          {      0,       0, 1e-7   }
                        };
   // x0 , y0 , theta0: own code
   const float x0[3][1] {  { 0 },
