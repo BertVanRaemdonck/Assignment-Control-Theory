@@ -145,7 +145,7 @@ plot(t, u_ref(2,:))
 
 % ============================== Experiment ===============================
 
-rec = readlog('log_gpio_feed_forward_test1.xml');
+rec = readlog('log_gpio_feed_forward_test3.xml');
 
 t_input = rec.getData('time');
 vA = rec.getData('wheel_speedA');
