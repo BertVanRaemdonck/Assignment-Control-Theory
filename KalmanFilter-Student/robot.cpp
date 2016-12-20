@@ -91,12 +91,22 @@ void Robot::controllerHook() {
       //send wheel speed command
       NavigationController::u_t vLR = _nav.ControlToWheelSpeeds(unav);
       velocityControlUpdate(vLR(0), vLR(1));
+
+  
     } else {
       // \begin{own code}
       // just drive the cart with the feedforward velocity
-      float uff_arr [2][1] = { {System.getGPinFloat(3)}, {System.getGPinFloat(4)} };
+      //float uff_arr [2][1] = { {System.getGPinFloat(3)}, {System.getGPinFloat(4)} };
+
+      NavigationController::u_t uff_arr;
+      uff_arr(0) = System.getGPinFloat(3);
+      uff_arr(1) = System.getGPinFloat(4);
+      
       NavigationController::u_t vLR = _nav.ControlToWheelSpeeds(uff_arr);
-      velocityControlUpdate(vLR(0), vLR(1));      
+      velocityControlUpdate(-vLR(0), vLR(1));    
+
+      System.setGPoutFloat(0, uff_arr(0));
+      System.setGPoutFloat(1, uff_arr(1));
       // \end{own code}
 
       /*
@@ -108,6 +118,7 @@ void Robot::controllerHook() {
     resetVelocityControl(); // own code
     _motor1->setBridgeVoltage(0);
     _motor2->setBridgeVoltage(0);
+
   }
 
   // int outputs
@@ -116,8 +127,8 @@ void Robot::controllerHook() {
   System.setGPoutInt(2, System.getGPinInt(0));
 
   // float outputs
-  System.setGPoutFloat(0, -wheelSpeedA());
-  System.setGPoutFloat(1, wheelSpeedB());
+  //System.setGPoutFloat(0, -wheelSpeedA());
+  //System.setGPoutFloat(1, wheelSpeedB());
   //System.setGPoutFloat(2, _ekf.getStateStandardDeviation(0));
   //System.setGPoutFloat(3, _ekf.getStateStandardDeviation(1));
   //System.setGPoutFloat(4, _ekf.getStateStandardDeviation(2));
@@ -183,7 +194,7 @@ void Robot::resetKalmanFilter()
 void Robot::resetNavigationController()
 {
   // still need to fill in!
-//  _nav.setCartParameters(0.1695/2.0); // own code: measured value for a
+  _nav.setCartParameters(0.1695/2.0); // own code: measured value for a
 //  const float Kfb[2][3] { {##kx##,      0,          0},
 //                          {     0, ##ky##, ##ktheta##}
 //                        };
@@ -223,12 +234,12 @@ bool Robot::toggleButton(uint8_t button)
 
 bool Robot::KalmanFilterEnabled()
 {
-  return _button_states[0];
+  return _button_states[1];
 }
 
 bool Robot::navigationEnabled()
 {
-  return _button_states[1];
+  return _button_states[2];
 }
 
 void Robot::button1callback()
@@ -236,6 +247,16 @@ void Robot::button1callback()
   toggleButton(0);
 
   resetEncoders();
+  // \begin(own_code)
+  resetNavigationController();
+  resetKalmanFilter();
+  resetVelocityControl();
+
+  //_button_states[1] = 0;
+  //_button_states[2] = 0;
+  
+
+  // \end(own_code)
 
   System.println("Reset.");
 }
