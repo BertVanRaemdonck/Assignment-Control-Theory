@@ -162,12 +162,14 @@ double Robot::wheelSpeedB()
 void Robot::resetKalmanFilter()
 {
   // these values have to be tuned: own code
-  const float Q[3][3] {  {3e-11   ,       0,       0},
+  const float Q[3][3] {  {3e-11  ,       0,       0},
                          {      0, 3e-11   ,       0},
                          {      0,       0, 3e-11   }
                       };
-  const float R[2][2] {  {9e-10   ,       0},
-                         {      0, 8e-10   }
+  // R determined by setting everything to 0 except meas_valid, and look at the noise. Noise chosen such that noise is equal for both and within a reasonable range
+  // becomes unstable at around 0.2e-10 and 1.5e-10 -> safety margin
+  const float R[2][2] {  {8e-10   ,       0},
+                         {      0, 4e-10   }
                       };
   const float P0[3][3] {  {3e-11   ,       0,       0},
                           {      0, 3e-11   ,       0},

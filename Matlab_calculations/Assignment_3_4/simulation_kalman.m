@@ -59,6 +59,7 @@ y = zeros(n_y, length(t));
 e = zeros(n_x, length(t));
 x_est = zeros(n_x, length(t));
 P_est = zeros(n_x, n_x, length(t));
+P_est(:,:,1) = [1e-4 0.5e-4 0 ; 0.5e-4 1e-4 0 ; 0 0 1e-4];
 nu = zeros(n_y, length(t));
 S = zeros(n_y, n_y, length(t));
 L = zeros(n_x, n_y, length(t));
@@ -92,6 +93,9 @@ wall_params = [a1, b1, c1 ; a2, b2, c2];
 
 figure()
 hold on
+daspect([1 1 1])
+cont = drawellipsoid(P_est(1:2,1:2,1));
+plot(cont(:,1), cont(:,2))
 % simulation
 
 if state_feedback ~= 1
@@ -139,9 +143,6 @@ plot(x_est(1,:), x_est(2,:));
 hold off
 legend('actual', 'estimated')
 
-figure
-plot(t, u_ref(2,:))
-
 
 % ============================== Experiment ===============================
 
@@ -160,22 +161,16 @@ meas_valid = rec.getData('meas_valid');
 
 figure
 subplot(3,1,1)
-plot(x_kalman)
-subplot(3,1,2)
-plot(y_kalman)
-subplot(3,1,3)
 plot(x_ref)
 hold on
-plot(y_ref)
-hold off
-
-figure
-subplot(2,1,1)
 plot(x_kalman)
+hold off
+subplot(3,1,2)
+plot(y_ref)
 hold on
 plot(y_kalman)
 hold off
-subplot(2,1,2)
+subplot(3,1,3)
 plot(meas_valid)
 
 figure

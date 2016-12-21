@@ -12,7 +12,7 @@ a2 = wall_params(2,1);
 b2 = wall_params(2,2);
 c2 = wall_params(2,3);
 
-J = [a1/sqrt(a1^2+b1^2),    b1/sqrt(a1^2+b1^2), 0;
-     a2/sqrt(a2^2+b2^2),    b2/sqrt(a2^2+b2^2), 0];
+J = [-a1/sqrt(a1^2+b1^2),   -b1/sqrt(a1^2+b1^2), 0;
+     -a2/sqrt(a2^2+b2^2),   -b2/sqrt(a2^2+b2^2), 0];
 end
 
