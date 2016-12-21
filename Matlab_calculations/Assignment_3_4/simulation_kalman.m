@@ -35,15 +35,15 @@ x0 = zeros(n_x,1);
 % initial state estimate
 x_est0 = zeros(n_x,1);
 % feedback values
-kx = 0.5;
-ky = 0.5;
-kt = 0.5;
+kx = 0.2*2;
+ky = 0.2*20;
+kt = 0.2*20;
 % trajectory file
 filename = 'TrajectoryKalmanExercise.txt';
 
 % ============================== Simulation ===============================
 dead_reckoning = 0; % set to 1 to see the result with dead reckoning
-state_feedback = 0; % set to 1 to enable state feedback
+state_feedback = 1; % set to 1 to enable state feedback
 nb_walls = 2;       % can be set to 1 or 2 to give the amount of walls
 
 % read file
@@ -140,8 +140,10 @@ figure()
 plot(x(1,:), x(2,:));
 hold on
 plot(x_est(1,:), x_est(2,:));
+hold on
+plot(x_ref(1,:), x_ref(2,:));
 hold off
-legend('actual', 'estimated')
+legend('actual', 'estimated', 'reference')
 
 
 % ============================== Experiment ===============================

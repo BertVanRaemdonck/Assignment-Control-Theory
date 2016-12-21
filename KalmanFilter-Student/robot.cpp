@@ -49,6 +49,8 @@ void Robot::init() {
 }
 
 double _error_integrator = 0;
+//own code:
+NavigationController::u_t unav;
 
 void Robot::controllerHook() {
   // \begin{own code}
@@ -72,24 +74,31 @@ void Robot::controllerHook() {
     //prediction step : own code
     float u_ff_pred [2][1] = { {System.getGPinFloat(3)}, {System.getGPinFloat(4)} }; // contains the same as uff_arr, but separate variable just in case navigationEnabled is False
     
-    _ekf.PredictionStep(NavigationController::u_t(u_ff_pred));
+    
+    if (navigationEnabled()) {
+        _ekf.PredictionStep(unav);
+      
+    }
+    else {
+      _ekf.PredictionStep(NavigationController::u_t(u_ff_pred));
+    }
       
     //correction step
     //unless measurement is invalid
     if (System.getGPinInt(0)) { 
       // own code      
-      _ekf.CorrectionStep(y_meas);
+      // _ekf.CorrectionStep(y_meas);
     }
     
     //navigator
     if (navigationEnabled()) { // press button 2 to toggle
       //compute feedback
       float xref_arr [3][1] = { {System.getGPinFloat(0)}, {System.getGPinFloat(1)}, {System.getGPinFloat(2)} };
-      float uff_arr [2][1] = { {System.getGPinFloat(3)}, {System.getGPinFloat(4)} };
-      NavigationController::u_t unav = _nav.Controller(_ekf.getState(), NavigationController::x_t(xref_arr), NavigationController::u_t(uff_arr));
+      //float uff_arr [2][1] = { {System.getGPinFloat(3)}, {System.getGPinFloat(4)} };
+      unav = _nav.Controller(_ekf.getState(), NavigationController::x_t(xref_arr), NavigationController::u_t(u_ff_pred));
       //send wheel speed command
       NavigationController::u_t vLR = _nav.ControlToWheelSpeeds(unav);
-      velocityControlUpdate(vLR(0), vLR(1));
+      velocityControlUpdate(-vLR(0), vLR(1));
 
   
     } else {
@@ -169,7 +178,7 @@ void Robot::resetKalmanFilter()
   // R determined by setting everything to 0 except meas_valid, and look at the noise. Noise chosen such that noise is equal for both and within a reasonable range
   // becomes unstable at around 0.2e-10 and 1.5e-10 -> safety margin
   const float R[2][2] {  {8e-10   ,       0},
-                         {      0, 4e-10   }
+                         {      0, 8e-10   }
                       };
   const float P0[3][3] {  {3e-11   ,       0,       0},
                           {      0, 3e-11   ,       0},
@@ -193,10 +202,10 @@ void Robot::resetNavigationController()
 {
   // still need to fill in!
   _nav.setCartParameters(0.1695/2.0); // own code: measured value for a
-//  const float Kfb[2][3] { {##kx##,      0,          0},
-//                          {     0, ##ky##, ##ktheta##}
-//                        };
-//  _nav.setFeedbackGainMatrix(NavigationController::K_t(Kfb));
+  const float Kfb[2][3] { {5.0   ,      0,          0},
+                          {     0, 5.0   , 5.0       }
+                        };
+  _nav.setFeedbackGainMatrix(NavigationController::K_t(Kfb));
 }
 
 double Robot::wrap2pi(double angle)

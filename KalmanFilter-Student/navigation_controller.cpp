@@ -30,6 +30,34 @@ Matrix<2, 1> NavigationController::Controller(const Matrix<3, 1>& x, const Matri
   // still need to fill in
   //##Compute feedback for global navigation using Kfb (the state feedback gain in local cart frame)##
 
+  // \begin{own code}
+  // calculate global error of x and y
+  //Matrix<3, 1> e_glob = xref - x;
+  Matrix<2, 1> e_glob_xy;
+  e_glob_xy(0) = xref(0) - x(0);
+  e_glob_xy(1) = xref(1) - x(1);
+
+  // calculate transformation matrix from global to local for the errors in x and y
+  Matrix<2, 2> Rot;
+  Rot(0,0) =  cos(x(2));
+  Rot(0,1) = -sin(x(2));
+  Rot(1,0) =  sin(x(2));
+  Rot(1,1) =  cos(x(2));
+
+  // calculate local error of x and y
+  Matrix<2, 1> e_loc_xy = Rot * e_glob_xy;
+
+  // calculate total local error
+  Matrix<3, 1> e_loc;
+  e_loc(0) = e_loc_xy(0);
+  e_loc(1) = e_loc_xy(1);
+  e_loc(2) = xref(2) - x(2);
+
+  // calculate feedback
+  u = Kfb * e_loc;
+  
+  // \end{own code}  
+
   // Add feed-forward term
   u += uff;
 
