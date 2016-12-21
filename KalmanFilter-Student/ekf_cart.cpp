@@ -32,8 +32,8 @@ EkfCart::y_t EkfCart::hfun(const x_t& x) const {
   //implement measurement model: own code
   Matrix<2,1> y;
   
-  y(0) = ( weq1(0)*(x(0)-alpha) + weq1(1)*x(1)         - weq1(2) ) / sqrt( pow(weq1(0),2) + pow(weq1(1),2) ) ;
-  y(1) = ( weq2(0)*(x(0)+beta)  + weq2(1)*(x(1)-gamma) - weq2(2) ) / sqrt( pow(weq2(0),2) + pow(weq2(1),2) ) ;
+  y(0) = -( weq1(0)*(x(0)+alpha) + weq1(1)*x(1)         - weq1(2) ) / sqrt( pow(weq1(0),2.0) + pow(weq1(1),2.0) ) ;
+  y(1) = -( weq2(0)*(x(0)-beta)  + weq2(1)*(x(1)+gamma) - weq2(2) ) / sqrt( pow(weq2(0),2.0) + pow(weq2(1),2.0) ) ;
 
   return y;
 }
@@ -43,11 +43,11 @@ EkfCart::C_t EkfCart::Cfun(const x_t& x) const {
   Matrix<2,3> Jh;
   Jh.Fill(0.0);
 
-  Jh(0,0) = weq1(0) / sqrt( pow(weq1(0),2) + pow(weq1(1),2) ) ;
-  Jh(0,1) = weq1(1) / sqrt( pow(weq1(0),2) + pow(weq1(1),2) ) ;
+  Jh(0,0) = - weq1(0) / sqrt( pow(weq1(0),2.0) + pow(weq1(1),2.0) ) ;
+  Jh(0,1) = - weq1(1) / sqrt( pow(weq1(0),2.0) + pow(weq1(1),2.0) ) ;
 
-  Jh(1,0) = weq2(0) / sqrt( pow(weq2(0),2) + pow(weq2(1),2) ) ;
-  Jh(1,1) = weq2(1) / sqrt( pow(weq2(0),2) + pow(weq2(1),2) ) ;
+  Jh(1,0) = - weq2(0) / sqrt( pow(weq2(0),2.0) + pow(weq2(1),2.0) ) ;
+  Jh(1,1) = - weq2(1) / sqrt( pow(weq2(0),2.0) + pow(weq2(1),2.0) ) ;
 
   return Jh;
 }

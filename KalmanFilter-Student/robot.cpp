@@ -62,6 +62,11 @@ void Robot::controllerHook() {
   _speed1->readCalibratedValue();
   _speed2->readCalibratedValue();
 
+  // own code
+  Matrix<2,1> y_meas;
+  y_meas(0) = float(_distance1->readCalibratedValue());
+  y_meas(1) = float(_distance2->readCalibratedValue());
+  
   //Kalman filtering
   if (KalmanFilterEnabled()) { // press button 1 to toggle
     //prediction step : own code
@@ -72,11 +77,7 @@ void Robot::controllerHook() {
     //correction step
     //unless measurement is invalid
     if (System.getGPinInt(0)) { 
-      // own code
-      Matrix<2,1> y_meas;
-      y_meas(0) = _distance1->readCalibratedValue();
-      y_meas(1) = _distance2->readCalibratedValue();
-      
+      // own code      
       _ekf.CorrectionStep(y_meas);
     }
     
@@ -161,16 +162,16 @@ double Robot::wheelSpeedB()
 void Robot::resetKalmanFilter()
 {
   // these values have to be tuned: own code
-  const float Q[3][3] {  {1e-7   ,       0,       0},
-                         {      0, 1e-7   ,       0},
-                         {      0,       0, 1e-7   }
+  const float Q[3][3] {  {3e-11   ,       0,       0},
+                         {      0, 3e-11   ,       0},
+                         {      0,       0, 3e-11   }
                       };
-  const float R[2][2] {  {1e-10   ,       0},
-                         {      0, 1e-10   }
+  const float R[2][2] {  {9e-10   ,       0},
+                         {      0, 8e-10   }
                       };
-  const float P0[3][3] {  {1e-7   ,       0,       0},
-                          {      0, 1e-7   ,       0},
-                          {      0,       0, 1e-7   }
+  const float P0[3][3] {  {3e-11   ,       0,       0},
+                          {      0, 3e-11   ,       0},
+                          {      0,       0, 3e-11   }
                        };
   // x0 , y0 , theta0: own code
   const float x0[3][1] {  { 0 },
