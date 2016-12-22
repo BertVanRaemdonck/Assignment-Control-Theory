@@ -203,7 +203,7 @@ void Robot::resetNavigationController()
 {
   // still need to fill in!
   _nav.setCartParameters(0.1695/2.0); // own code: measured value for a
-  const float Kfb[2][3] { {5.0   ,      0,          0},
+  const float Kfb[2][3] { {1.0   ,      0,          0},
                           {     0, 1.0   , 1.0       }
                         };
   _nav.setFeedbackGainMatrix(NavigationController::K_t(Kfb));
