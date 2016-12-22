@@ -68,11 +68,11 @@ if show_figures == 1
     subplot(3,1,2)
     plot(t, enc1);
     xlabel('t [ms]')
-    ylabel('value encoder 1')
+    ylabel('\theta_1 [enc]')
     subplot(3,1,3)
     plot(t, enc2);
     xlabel('t [ms]')
-    ylabel('value encoder 2')
+    ylabel('\theta_2 [enc]')
 end
 
 
@@ -98,11 +98,11 @@ if show_figures == 1
     subplot(3,1,2)
     plot(t, enc1_v);             
     xlabel('t [ms]')
-    ylabel('speed encoder 1')
+    ylabel('\omega_1 [enc/s]')
     subplot(3,1,3)
     plot(t, enc2_v);             
     xlabel('t [ms]')
-    ylabel('speed encoder 2')
+    ylabel('\omega_2 [enc/s]')
 end
 
 %% Converting to frequency domain
@@ -224,8 +224,8 @@ if show_figures == 1
     hold on
     plot(t,enc1_v_est,'--')
     xlabel('t [s]')
-    ylabel('speed [?]')
-    legend('emp','est')
+    ylabel('\omega_1 [enc/s]')
+    legend('emp','est','location','northwest')
     title('encoder 1')
     hold off
 
@@ -234,8 +234,8 @@ if show_figures == 1
     hold on
     plot(t,enc2_v_est,'--')
     xlabel('t [s]')
-    ylabel('speed [?]')
-    legend('emp','est')
+    ylabel('\omega_2 [enc/s]')
+    legend('emp','est','location','northwest')
     title('encoder 2')
     hold off
 end
@@ -306,7 +306,7 @@ if show_figures == 1
     hold on
     plot(time2,y2_enc1,'--')
     xlabel('t [s]')
-    ylabel('speed [?]')
+    ylabel('\omega_1 [enc/s]')
     legend('emp','est')
     hold off
 end
@@ -320,7 +320,7 @@ if show_figures == 1
     hold on
     plot(time2,y2_enc2,'--')
     xlabel('t [s]')
-    ylabel('speed [?]')
+    ylabel('\omega_2 [enc/s]')
     legend('emp','est')
     hold off
 end

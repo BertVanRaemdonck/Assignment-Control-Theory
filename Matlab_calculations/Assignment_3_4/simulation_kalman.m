@@ -146,9 +146,56 @@ hold off
 legend('actual', 'estimated', 'reference')
 
 
-% ============================== Experiment ===============================
+% ============================== Experiment 1 ===============================
 
-rec = readlog('log_gpio_feedback_test9.xml');
+rec = readlog('log_gpio_test_film1.xml');
+
+t_input = rec.getData('time');
+vA = rec.getData('wheel_speedA');
+vB = rec.getData('wheel_speedB');
+x_ref = rec.getData('x_ref');
+y_ref = rec.getData('y_ref');
+theta_ref = rec.getData('theta_ref');
+x_kalman = rec.getData('x_kalman');
+y_kalman = rec.getData('y_kalman');
+theta_kalman = rec.getData('theta_kalman');
+meas_valid = rec.getData('meas_valid');
+
+figure
+subplot(4,1,1)
+plot(x_ref)
+hold on
+plot(x_kalman)
+axis([-Inf Inf -0.3 0.3])
+hold off
+subplot(4,1,2)
+plot(y_ref)
+hold on
+plot(y_kalman)
+axis([-Inf Inf -0.3 0.3])
+hold off
+subplot(4,1,3)
+plot(theta_ref)
+hold on
+plot(theta_kalman)
+axis([-Inf Inf -6 1])
+hold off
+subplot(4,1,4)
+plot(meas_valid)
+%axis([-Inf Inf -Inf Inf])
+
+figure
+plot(x_ref, y_ref)
+hold on
+plot(x_kalman, y_kalman)
+hold off
+legend('reference', 'estimated')
+
+
+
+% ============================== Experiment 2 ===============================
+
+rec = readlog('log_gpio_test_film1.xml');
 
 t_input = rec.getData('time');
 vA = rec.getData('wheel_speedA');
