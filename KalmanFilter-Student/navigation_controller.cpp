@@ -39,10 +39,10 @@ Matrix<2, 1> NavigationController::Controller(const Matrix<3, 1>& x, const Matri
 
   // calculate transformation matrix from global to local for the errors in x and y
   Matrix<2, 2> Rot;
-  Rot(0,0) =  cos(x(2));
-  Rot(0,1) = -sin(x(2));
-  Rot(1,0) =  sin(x(2));
-  Rot(1,1) =  cos(x(2));
+  Rot(0,0) =  cos(-x(2));
+  Rot(0,1) = -sin(-x(2));
+  Rot(1,0) =  sin(-x(2));
+  Rot(1,1) =  cos(-x(2));
 
   // calculate local error of x and y
   Matrix<2, 1> e_loc_xy = Rot * e_glob_xy;
@@ -59,7 +59,13 @@ Matrix<2, 1> NavigationController::Controller(const Matrix<3, 1>& x, const Matri
   // \end{own code}  
 
   // Add feed-forward term
-  u += uff;
+  //own code
+  Matrix<2, 2> Maal;
+  Maal(0,0) = 1.0;
+  Maal(0,1) = 0.0;
+  Maal(1,0) = 0.0;
+  Maal(1,1) = 1.0;
+  u += (Maal*uff);
 
   return u;
 }

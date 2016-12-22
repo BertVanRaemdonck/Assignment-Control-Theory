@@ -1,5 +1,10 @@
 Log naam				inhoud
 ________________________________________________________________________________
+log_gpio_test_film1			test bij eerste filmpje, je ziet ook de schokken van de referentiewaarden
+
+log_gpio_feedback_test9			met feedforward erbij, kx = 50, ky = 50, kt = 120 --> track zeer goed, weeral schokken in referentiewaarden (die hij direct trackt)
+log_gpio_feedback_test8			met feedforward erbij, veel hogere k: kx=50, ky=20, kt=120 --> track praktisch perfect de opgegeven referentiewaarden, maar referentiewaarden maken random sprongen... (why.......)
+log_gpio_feedback_test7			zonder feedforward in correction step, hogere k waardes: kx = 5.0, ky=0.2 en kt = 12.0 + theta's negatief gemaakt in de rotatie matrix
 log_gpio_feedback_test6			kx = 0.5, ky= 0.1, kt=1.0 --> benadert zonder feedback, dus niet meer onstabiel
 log_gpio_feedback_test5			weet het niet meer
 log_gpio_feedback_test4			kx = 0.5, ky=kt=2.0 --> minder goede hoeken als test 3, maar blijft langer stabiel

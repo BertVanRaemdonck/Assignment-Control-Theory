@@ -148,7 +148,7 @@ legend('actual', 'estimated', 'reference')
 
 % ============================== Experiment ===============================
 
-rec = readlog('log_gpio_feedback_test4.xml');
+rec = readlog('log_gpio_feedback_test9.xml');
 
 t_input = rec.getData('time');
 vA = rec.getData('wheel_speedA');
