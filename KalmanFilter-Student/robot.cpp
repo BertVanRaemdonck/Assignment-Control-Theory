@@ -71,23 +71,13 @@ void Robot::controllerHook() {
   
   //Kalman filtering
   if (KalmanFilterEnabled()) { // press button 1 to toggle
-    //prediction step : own code
-    float u_ff_pred [2][1] = { {System.getGPinFloat(3)}, {System.getGPinFloat(4)} }; // contains the same as uff_arr, but separate variable just in case navigationEnabled is False
-    
-    
-    if (navigationEnabled()) {
-        _ekf.PredictionStep(unav);
-      
-    }
-    else {
-      _ekf.PredictionStep(NavigationController::u_t(u_ff_pred));
-    }
-      
+    float u_ff_pred [2][1] = { {System.getGPinFloat(3)}, {System.getGPinFloat(4)} }; // own code: contains the same as uff_arr, but separate variable just in case navigationEnabled is False
+        
     //correction step
     //unless measurement is invalid
     if (System.getGPinInt(0)) { 
       // own code      
-      // _ekf.CorrectionStep(y_meas);
+      _ekf.CorrectionStep(y_meas);
     }
     
     //navigator
@@ -118,6 +108,17 @@ void Robot::controllerHook() {
       _motor2->setBridgeVoltage(0);
       */
     }
+
+    // prediction step
+    // \begin{own code}
+    if (navigationEnabled()) {
+        _ekf.PredictionStep(unav);      
+    }
+    else {
+      _ekf.PredictionStep(NavigationController::u_t(u_ff_pred));
+    }
+    // \end{own code}
+    
   } else {
     resetVelocityControl(); // own code
     _motor1->setBridgeVoltage(0);
