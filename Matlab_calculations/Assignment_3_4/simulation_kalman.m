@@ -148,7 +148,7 @@ legend('actual', 'estimated', 'reference')
 
 % ============================== Experiment ===============================
 
-rec = readlog('log_gpio_feedback_test2.xml');
+rec = readlog('log_gpio_feedback_test3.xml');
 
 t_input = rec.getData('time');
 vA = rec.getData('wheel_speedA');
@@ -166,23 +166,23 @@ subplot(4,1,1)
 plot(x_ref)
 hold on
 plot(x_kalman)
-axis([-Inf 1000 -0.3 0.3])
+axis([-Inf 1400 -0.3 0.3])
 hold off
 subplot(4,1,2)
 plot(y_ref)
 hold on
 plot(y_kalman)
-axis([-Inf 1000 -0.3 0.3])
+axis([-Inf 1400 -0.3 0.3])
 hold off
 subplot(4,1,3)
 plot(theta_ref)
 hold on
 plot(theta_kalman)
-axis([-Inf 1000 -6 1])
+axis([-Inf 1400 -6 1])
 hold off
 subplot(4,1,4)
 plot(meas_valid)
-axis([-Inf 1000 -Inf Inf])
+axis([-Inf 1400 -Inf Inf])
 
 figure
 plot(x_ref, y_ref)
