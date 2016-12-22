@@ -148,7 +148,7 @@ legend('actual', 'estimated', 'reference')
 
 % ============================== Experiment 1 ===============================
 
-rec = readlog('log_gpio_test_film1.xml');
+rec = readlog('log_gpio_feedback_test6.xml');
 
 t_input = rec.getData('time');
 vA = rec.getData('wheel_speedA');
@@ -167,21 +167,33 @@ plot(x_ref)
 hold on
 plot(x_kalman)
 axis([-Inf Inf -0.3 0.3])
+xlabel('t [ms]')
+ylabel('x [m]')
+title('comparison position x')
 hold off
 subplot(4,1,2)
 plot(y_ref)
 hold on
 plot(y_kalman)
 axis([-Inf Inf -0.3 0.3])
+xlabel('t [ms]')
+ylabel('y [m]')
+title('comparison position y')
 hold off
 subplot(4,1,3)
 plot(theta_ref)
 hold on
 plot(theta_kalman)
 axis([-Inf Inf -6 1])
+xlabel('t [ms]')
+ylabel('\theta [rad]')
+title('comparison angle \theta')
 hold off
 subplot(4,1,4)
 plot(meas_valid)
+xlabel('t [ms]')
+ylabel('meas valid [-]')
+title('measuremtens valid')
 %axis([-Inf Inf -Inf Inf])
 
 figure
@@ -190,6 +202,9 @@ hold on
 plot(x_kalman, y_kalman)
 hold off
 legend('reference', 'estimated')
+xlabel('x [m]')
+ylabel('y [m]')
+title('position of center cart')
 
 
 
@@ -215,20 +230,32 @@ hold on
 plot(x_kalman)
 axis([-Inf Inf -0.3 0.3])
 hold off
+xlabel('t [ms]')
+ylabel('x [m]')
+title('comparison position x')
 subplot(4,1,2)
 plot(y_ref)
 hold on
 plot(y_kalman)
 axis([-Inf Inf -0.3 0.3])
 hold off
+xlabel('t [ms]')
+ylabel('y [m]')
+title('comparison position y')
 subplot(4,1,3)
 plot(theta_ref)
 hold on
 plot(theta_kalman)
 axis([-Inf Inf -6 1])
 hold off
+xlabel('t [ms]')
+ylabel('\angle [rad]')
+title('comparison angle \theta')
 subplot(4,1,4)
 plot(meas_valid)
+xlabel('t [ms]')
+ylabel('meas valid [-]')
+title('measurements valid')
 %axis([-Inf Inf -Inf Inf])
 
 figure
@@ -237,3 +264,6 @@ hold on
 plot(x_kalman, y_kalman)
 hold off
 legend('reference', 'estimated')
+xlabel('x [m]')
+ylabel('y [m]')
+title('position of center cart')

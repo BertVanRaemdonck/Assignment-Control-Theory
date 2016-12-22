@@ -256,7 +256,7 @@ if show_figures5 == 1
     subplot(2,2,4)
     plot(t, control_signal1);
     xlabel('t [s]')
-    ylabel('control signal 1 [mV]')
+    ylabel('V_1 [mV]')
     axis([t_start t_stop -inf inf]);
     title('control signal of motor 1')
 end
@@ -297,7 +297,7 @@ if show_figures5 == 1
     subplot(2,2,4)
     plot(t, control_signal2);
     xlabel('t [s]')
-    ylabel('control signal 2 [mV]')
+    ylabel('V_2 [mV]')
     axis([t_start t_stop -inf inf]);
     title('control signal of motor 2')
 end

@@ -147,7 +147,7 @@ if show_figures6 == 1
     subplot(2,2,4)
     plot(t, speed_cart);
     xlabel('t [s]')
-    ylabel('speed cart [m/s]')
+    ylabel('v_{cart} [m/s]')
     axis([t_start t_stop -inf inf]);
     title('speed of the cart')
 end
@@ -219,7 +219,7 @@ if show_figures6 == 1
     subplot(2,2,4)
     plot(t, speed_cart);
     xlabel('t [s]')
-    ylabel('speed cart [m/s]')
+    ylabel('v_{cart} [m/s]')
     axis([t_start t_stop -inf inf]);
     title('speed of the cart')
 end

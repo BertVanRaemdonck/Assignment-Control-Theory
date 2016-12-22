@@ -7,8 +7,8 @@ function [ err_loc ] = local_error( x_ref, x_est )
 err_glo_x = x_ref(1)-x_est(1);
 err_glo_y = x_ref(2)-x_est(2);
 
-Rot = [cos(x_est(3))     -sin(x_est(3));
-       sin(x_est(3))     cos(x_est(3))]; 
+Rot = [cos(-x_est(3))     -sin(-x_est(3));
+       sin(-x_est(3))     cos(-x_est(3))]; 
    
 err_loc_xy = Rot*[err_glo_x;
                   err_glo_y];
