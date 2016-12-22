@@ -1,6 +1,7 @@
 Log naam				inhoud
 ________________________________________________________________________________
-
+log_gpio_feedback_test6			kx = 0.5, ky= 0.1, kt=1.0 --> benadert zonder feedback, dus niet meer onstabiel
+log_gpio_feedback_test5			weet het niet meer
 log_gpio_feedback_test4			kx = 0.5, ky=kt=2.0 --> minder goede hoeken als test 3, maar blijft langer stabiel
 log_gpio_feedback_test3			volledig traject met kx=ky=kt=1.0 (beter resultaat dan ervoor)
 log_gpio_feedback_test2			volledig traject met kx=5.0, ky=kt=1.0 (begint met uitstekend te volgen, daarna schiet hij weg)
