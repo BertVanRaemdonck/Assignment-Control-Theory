@@ -36,15 +36,20 @@ if show_figures4 == 1
     bode(sys_pos1_open_d)
     hold off
     legend('continuous time','discrete time')
-    
     figure('name', 'open loop bode diagram position 2')
-    bode(sys_pos2_open_c)
     hold on
-    bode(sys_pos2_open_d)
+    
     hold off
-    legend('continuous time','discrete time')   
+    legend('continuous time','discrete time')
+    bode(sys_pos2_open_c)
 end
 
+if show_figures4 == 1
+    figure('name', 'open loop bode diagram position 1 discrete time')
+    
+    figure('name', 'open loop bode diagram position 2 discrete time')
+    bode(sys_pos2_open_d)
+end
 
 clear show_figures4
 

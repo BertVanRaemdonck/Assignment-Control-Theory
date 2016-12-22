@@ -48,11 +48,11 @@ if show_figures2 == 1
     figure('name','Bodeplot of encoders without PI in discrete and continuous time')
     subplot(2,1,1)
     bode(sys_enc1_or, sys_enc1_c),grid
-    legend('enc1 disc', 'enc1 cont','location','southwest')
+    legend('enc1 disc', 'enc1 cont')
     title('Bode diagram for encoder 1')
     subplot(2,1,2)
     bode(sys_enc2_or, sys_enc2_c),grid
-    legend('enc2 disc', 'enc2 cont','location','southwest')
+    legend('enc2 disc', 'enc2 cont')
     title('Bode diagram for encoder 2')
 end
 
@@ -106,20 +106,20 @@ if show_figures2 == 1
     subplot(2,1,1)
     bode(sys_enc1_c, sys_enc1_PIcomp_c, w), grid
     title('Bode diagram for the compensated encoder 1')
-    legend('enc1', 'enc1_PIcomp','location','southwest')
+    legend('enc1', 'enc1_PIcomp')
     subplot(2,1,2)
     bode(sys_enc2_c, sys_enc2_PIcomp_c, w), grid
     title('Bode diagram for the compensated encoder 2')
-    legend('enc2', 'enc2_PIcomp','location','southwest')
+    legend('enc2', 'enc2_PIcomp')
 
     figure('name', 'Bodeplot of the compensated systems in discrete time')
     subplot(2,1,1)
     bode(sys_enc1_or, sys_enc1_PIcomp_d, w), grid
-    legend('enc1', 'enc1_PIcomp','location','southwest')
+    legend('enc1', 'enc1_PIcomp')
     title('Bode diagram for the compensated encoder 1')
     subplot(2,1,2)
     bode(sys_enc2_or, sys_enc2_PIcomp_d, w), grid
-    legend('enc2', 'enc2_PIcomp','location','southwest')
+    legend('enc2', 'enc2_PIcomp')
     title('Bode diagram for the compensated encoder 2')
 end
 
@@ -151,7 +151,7 @@ if show_figures2 == 1
     plot(time_fb,y1_enc1_PIcomp_fb,'--')
     xlabel('t [s]')
     ylabel('\omega_1 [enc/s]')
-    legend('reference input','without controller','with controller','location','northwest')
+    legend('reference input','without controller','with controller')
     title('encoder 1')
     hold off
     subplot(2,1,2)
@@ -162,7 +162,7 @@ if show_figures2 == 1
     plot(time_fb,y1_enc2_PIcomp_fb,'--')
     xlabel('t [s]')
     ylabel('\omega_2 [enc/s]')
-    legend('reference input','without controller','with controller','location','northwest')
+    legend('reference input','without controller','with controller')
     title('encoder 2')
     hold off
 end
@@ -175,55 +175,54 @@ sys_PI1_d = c2d(sys_PI1, Ts, 'zoh');
 sys_PI2_d = c2d(sys_PI2, Ts, 'zoh');
 
 
-% %% Custom simulation of time response of compensated system
-% % To test if the implemented code in Arduino gives logical results
-% % Used for debugging
-% t = 0:Ts:30;          % [s]
-% ek_speed1 = [0.0, 0.0];
-% uk_speed1 = [0.0, 0.0];
-% 
-% ek = [zeros(1, round(length(t)/3)), -100*ones(1, length(t)-round(length(t)/3))];
-% uk = zeros(size(ek));
-% 
-% den_contr_speed1 = cell2mat(sys_PI1_d.den);
-% num_contr_speed1 = cell2mat(sys_PI2_d.num);
-% 
-% for time_index = 1:length(ek)
-%     % shift memories
-%     memory_index = 1;
-%     while j > 0
-%         ek_speed1(memory_index+1) = ek_speed1(memory_index+1-1);   % the j+1 is there because c++ starts from 0 but matlab from 1
-%         uk_speed1(memory_index+1) = uk_speed1(memory_index+1-1);
-%         memory_index = memory_index-1;
-%     end
-%     ek_speed1(1) = ek(time_index);
-%     
-%     % compute new voltage
-%     uk_speed1(0+1) = 1/(den_contr_speed1(0+1)) * ...
-%                      (-den_contr_speed1(1+1)*uk_speed1(1+1) + ...
-%                      num_contr_speed1(0+1)*ek_speed1(0+1) + ...
-%                      num_contr_speed1(1+1)*ek_speed1(1+1));
-%     
-%     % clip output of the controllers
-%     if uk_speed1(0+1) > 6000
-%         uk_speed1(0+1) = 6000;
-%     end
-%     if uk_speed1(0+1) < -6000
-%         uk_speed1(0+1) = -6000;
-%     end
-%     
-%     % put control signal in vector for viewing
-%     uk(time_index) = uk_speed1(1);
-%     
-% end
-% 
-% if show_figures2 == 1
-%     figure()
-%     plot(t, ek)
-%     hold on
-%     plot(t, uk)
-%     hold off
-% end
+%% Custom simulation of time response of compensated system
+% To test if the implemented code in Arduino gives logical results
+t = 0:Ts:30;          % [s]
+ek_speed1 = [0.0, 0.0];
+uk_speed1 = [0.0, 0.0];
+
+ek = [zeros(1, round(length(t)/3)), -100*ones(1, length(t)-round(length(t)/3))];
+uk = zeros(size(ek));
+
+den_contr_speed1 = cell2mat(sys_PI1_d.den);
+num_contr_speed1 = cell2mat(sys_PI2_d.num);
+
+for time_index = 1:length(ek)
+    % shift memories
+    memory_index = 1;
+    while j > 0
+        ek_speed1(memory_index+1) = ek_speed1(memory_index+1-1);   % the j+1 is there because c++ starts from 0 but matlab from 1
+        uk_speed1(memory_index+1) = uk_speed1(memory_index+1-1);
+        memory_index = memory_index-1;
+    end
+    ek_speed1(1) = ek(time_index);
+    
+    % compute new voltage
+    uk_speed1(0+1) = 1/(den_contr_speed1(0+1)) * ...
+                     (-den_contr_speed1(1+1)*uk_speed1(1+1) + ...
+                     num_contr_speed1(0+1)*ek_speed1(0+1) + ...
+                     num_contr_speed1(1+1)*ek_speed1(1+1));
+    
+    % clip output of the controllers
+    if uk_speed1(0+1) > 6000
+        uk_speed1(0+1) = 6000;
+    end
+    if uk_speed1(0+1) < -6000
+        uk_speed1(0+1) = -6000;
+    end
+    
+    % put control signal in vector for viewing
+    uk(time_index) = uk_speed1(1);
+    
+end
+
+if show_figures2 == 1
+    figure()
+    plot(t, ek)
+    hold on
+    plot(t, uk)
+    hold off
+end
 
 
 %% Comparison simulation of speed motors with actual response

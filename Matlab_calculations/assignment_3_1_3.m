@@ -67,7 +67,7 @@ if show_figures3 == 1
     plot(t, speed1_act);
     hold off
     xlabel('t [s]')
-    ylabel('speed [?]')
+    ylabel('\omega_1 [enc/s]')
     axis([t_start t_stop -inf inf]);
     legend('desired speed','actual speed','location','northeast')
     title('speed comparison of motor 1')
@@ -77,7 +77,7 @@ if show_figures3 == 1
     plot(t, speed1_PIcomp_fb);
     hold off
     xlabel('t [s]')
-    ylabel('speed [?]')
+    ylabel('\omega_1 [enc/s]')
     axis([t_start t_stop -inf inf]);
     legend('desired speed','simulated speed','location','southeast')
     title('speed comparison of motor 1')
@@ -87,14 +87,14 @@ if show_figures3 == 1
     plot(t, speed1_PIcomp_fb-speed1_des,'--');
     hold off
     xlabel('t [s]')
-    ylabel('\Deltaspeed [?]')
+    ylabel('\Delta \omega_1 [enc/s]')
     axis([t_start t_stop -inf inf]);
     legend('error actual','error simulated','location','southeast')
     title('error between speed and desired speed')
     subplot(2,2,4)
     plot(t, control_signal1);
     xlabel('t [s]')
-    ylabel('control signal 1 [mV]')
+    ylabel('V_1 [mV]')
     axis([t_start t_stop -inf inf]);
     title('control signal of motor 1')
 end
@@ -108,7 +108,7 @@ if show_figures3 == 1
     plot(t, speed2_act);
     hold off
     xlabel('t [s]')
-    ylabel('speed [?]')
+    ylabel('\omega_2 [enc/s]')
     axis([t_start t_stop -inf inf]);
     legend('desired speed','actual speed','location','southeast')
     title('speed comparison of motor 2')
@@ -118,7 +118,7 @@ if show_figures3 == 1
     plot(t, speed2_PIcomp_fb);
     hold off
     xlabel('t [s]')
-    ylabel('speed [?]')
+    ylabel('\omega_2 [enc/s]')
     axis([t_start t_stop -inf inf]);
     legend('desired speed','simulated speed','location','northeast')
     title('speed comparison of motor 2')
@@ -128,14 +128,14 @@ if show_figures3 == 1
     plot(t, speed2_PIcomp_fb-speed2_des,'--');
     hold off
     xlabel('t [s]')
-    ylabel('\Deltaspeed [?]')
+    ylabel('\Delta \omega_2 [enc/s]')
     axis([t_start t_stop -inf inf]);
     legend('error actual','error simulated')
     title('error between speed and desired speed')
     subplot(2,2,4)
     plot(t, control_signal2);
     xlabel('t [s]')
-    ylabel('control signal 2 [mV]')
+    ylabel('V_2 [mV]')
     axis([t_start t_stop -inf inf]);
     title('control signal of motor 2')
 end

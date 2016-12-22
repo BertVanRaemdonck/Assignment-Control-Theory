@@ -183,7 +183,7 @@ if show_figures == 1
     axis tight
     xlabel('f  [Hz]')
     ylabel('|FRF|  [dB]')
-    legend('emp', 'est')
+    legend('emp', 'est','location','southwest')
     title('encoder 1')
     subplot(2,2,3)
     semilogx(f, 180/pi*unwrap(angle(enc1_v_f./v_f)), f, 180/pi*unwrap(angle(FRF_enc1)), '--', 'LineWidth', 1)
@@ -191,7 +191,7 @@ if show_figures == 1
     axis tight
     xlabel('f  [Hz]')
     ylabel('\phi(FRF)  [^\circ]')
-    legend('emp', 'est')
+    legend('emp', 'est','location','southwest')
 
     subplot(2,2,2)
     semilogx(f, 20*log10(abs(enc2_v_f./v_f)), f, 20*log10(abs(FRF_enc2)), '--', 'LineWidth', 1)
@@ -199,7 +199,7 @@ if show_figures == 1
     axis tight
     xlabel('f  [Hz]')
     ylabel('|FRF|  [dB]')
-    legend('emp', 'est')
+    legend('emp', 'est','location','southwest')
     title('encoder 2')
     subplot(2,2,4)
     semilogx(f, 180/pi*unwrap(angle(enc2_v_f./v_f)), f, 180/pi*unwrap(angle(FRF_enc2)), '--', 'LineWidth', 1)
@@ -207,7 +207,7 @@ if show_figures == 1
     axis tight
     xlabel('f  [Hz]')
     ylabel('\phi(FRF)  [^\circ]')
-    legend('emp', 'est')
+    legend('emp', 'est','location','northwest')
 end
 
 %% Checking least squares approximation in time domain
