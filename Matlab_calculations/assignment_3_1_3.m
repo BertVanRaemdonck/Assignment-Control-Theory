@@ -12,6 +12,8 @@ show_figures = 0;   % assignment_3_1_1 doesn't display its figures, if set to ze
 show_figures2 = 0;  % assignment_3_1_2 doesn't display its figures, if set to zero, so works a bit faster
 assignment_3_1_2
 
+set(0,'defaultlinelinewidth',2)
+set(0,'defaultaxesfontsize',12)
 
 %% Parameters, getting data and calculations
 close all
@@ -63,6 +65,7 @@ if show_figures3 == 1
     figure('name', 'Comparison speed motor 1 with force disturbance')
     subplot(2,2,1)
     plot(t, speed1_des,'--');
+    grid on
     hold on
     plot(t, speed1_act);
     hold off
@@ -73,6 +76,7 @@ if show_figures3 == 1
     title('speed comparison of motor 1')
     subplot(2,2,2)
     plot(t, speed1_des,'--');
+    grid on
     hold on
     plot(t, speed1_PIcomp_fb);
     hold off
@@ -83,6 +87,7 @@ if show_figures3 == 1
     title('speed comparison of motor 1')
     subplot(2,2,3)
     plot(t, speed1_act-speed1_des);
+    grid on
     hold on
     plot(t, speed1_PIcomp_fb-speed1_des,'--');
     hold off
@@ -93,6 +98,7 @@ if show_figures3 == 1
     title('error between speed and desired speed')
     subplot(2,2,4)
     plot(t, control_signal1);
+    grid on
     xlabel('t [s]')
     ylabel('V_1 [mV]')
     axis([t_start t_stop -inf inf]);
@@ -104,6 +110,7 @@ if show_figures3 == 1
     figure('name', 'Comparison speed motor 2 with force disturbance')
     subplot(2,2,1)
     plot(t, speed2_des,'--');
+    grid on
     hold on
     plot(t, speed2_act);
     hold off
@@ -114,6 +121,7 @@ if show_figures3 == 1
     title('speed comparison of motor 2')
     subplot(2,2,2)
     plot(t, speed2_des,'--');
+    grid on
     hold on
     plot(t, speed2_PIcomp_fb);
     hold off
@@ -124,6 +132,7 @@ if show_figures3 == 1
     title('speed comparison of motor 2')
     subplot(2,2,3)
     plot(t, speed2_act-speed2_des);
+    grid on
     hold on
     plot(t, speed2_PIcomp_fb-speed2_des,'--');
     hold off
@@ -134,6 +143,7 @@ if show_figures3 == 1
     title('error between speed and desired speed')
     subplot(2,2,4)
     plot(t, control_signal2);
+    grid on
     xlabel('t [s]')
     ylabel('V_2 [mV]')
     axis([t_start t_stop -inf inf]);

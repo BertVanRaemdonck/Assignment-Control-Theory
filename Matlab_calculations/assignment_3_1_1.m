@@ -6,6 +6,9 @@ if ~ exist('show_figures', 'var')
     show_figures = 1;   % show_figures can be set to 0 in another file to suppress the figures in this code
 end
 
+set(0,'defaultlinelinewidth',2)
+set(0,'defaultaxesfontsize',12)
+
 
 %% Parameters
 fs = 100;   % Hz
@@ -63,14 +66,17 @@ if show_figures == 1
     figure('name', 'Raw input data')
     subplot(3,1,1)
     plot(t, v);
+    grid on
     xlabel('t [ms]')
     ylabel('v [mV]')
     subplot(3,1,2)
     plot(t, enc1);
+    grid on
     xlabel('t [ms]')
     ylabel('\theta_1 [enc]')
     subplot(3,1,3)
     plot(t, enc2);
+    grid on
     xlabel('t [ms]')
     ylabel('\theta_2 [enc]')
 end
@@ -93,14 +99,17 @@ if show_figures == 1
     figure('name', 'Processed input data')
     subplot(3,1,1)
     plot(t, v);
+    grid on
     xlabel('t [ms]')
     ylabel('v [mV]')
     subplot(3,1,2)
-    plot(t, enc1_v);             
+    plot(t, enc1_v);  
+    grid on
     xlabel('t [ms]')
     ylabel('\omega_1 [enc/s]')
     subplot(3,1,3)
-    plot(t, enc2_v);             
+    plot(t, enc2_v);
+    grid on
     xlabel('t [ms]')
     ylabel('\omega_2 [enc/s]')
 end
@@ -117,28 +126,34 @@ if show_figures == 1
     figure('name', 'Input data in the frequency domain')
     subplot(3,2,1)
     plot(f, abs(v_f))
+    grid on
     xlabel('f [Hz]')
     ylabel('|v|')
     subplot(3,2,2)
     plot(f, 180/pi*unwrap(angle(v_f)))
+    grid on
     xlabel('f [Hz]')
     ylabel('\anglev [°]')
 
     subplot(3,2,3)
     plot(f, abs(enc1_v_f))
+    grid on
     xlabel('f [Hz]')
     ylabel('|enc1|')
     subplot(3,2,4)
     plot(f, 180/pi*unwrap(angle(enc1_v_f)))
+    grid on
     xlabel('f [Hz]')
     ylabel('\angleenc1 [°]')
 
     subplot(3,2,5)
     plot(f, abs(enc2_v_f))
+    grid on
     xlabel('f [Hz]')
     ylabel('|enc2|')
     subplot(3,2,6)
     plot(f, 180/pi*unwrap(angle(enc2_v_f)))
+    grid on
     xlabel('f [Hz]')
     ylabel('\angleenc2 [°]')
 end
@@ -221,6 +236,7 @@ if show_figures == 1
     figure('name','Comparison time response')
     subplot(2,1,1)
     plot(t,enc1_v)
+    grid on
     hold on
     plot(t,enc1_v_est,'--')
     xlabel('t [s]')
@@ -231,6 +247,7 @@ if show_figures == 1
 
     subplot(2,1,2)
     plot(t,enc2_v)
+    grid on
     hold on
     plot(t,enc2_v_est,'--')
     xlabel('t [s]')
@@ -303,6 +320,7 @@ y2_enc1 = lsim(sys_enc1,v2,time2,'--');
 if show_figures == 1
     figure('name','lsim encoder 1 input 2')
     plot(time2,enc12_speed)
+    grid on
     hold on
     plot(time2,y2_enc1,'--')
     xlabel('t [s]')
@@ -317,6 +335,7 @@ y2_enc2 = lsim(sys_enc2,v2,time2,'--');
 if show_figures == 1
     figure('name','lsim encoder 2 input 2')
     plot(time2,enc22_speed)
+    grid on
     hold on
     plot(time2,y2_enc2,'--')
     xlabel('t [s]')

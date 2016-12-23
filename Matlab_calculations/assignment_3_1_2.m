@@ -10,6 +10,9 @@ end
 show_figures = 0;   % assignment_3_1_1 doesn't display its figures, if set to zero, so works a bit faster
 assignment_3_1_1
 
+set(0,'defaultlinelinewidth',2)
+set(0,'defaultaxesfontsize',12)
+
 
 %% Parameters, getting data and calculations
 
@@ -145,9 +148,9 @@ if show_figures2 == 1
     figure('name','lsim encoders with feedback loop')
     subplot(2,1,1)
     plot(time_fb,speed_ref)
+    grid on
     hold on
     plot(time_fb,y1_enc1_or_fb,':')
-    hold on
     plot(time_fb,y1_enc1_PIcomp_fb,'--')
     xlabel('t [s]')
     ylabel('\omega_1 [enc/s]')
@@ -156,9 +159,9 @@ if show_figures2 == 1
     hold off
     subplot(2,1,2)
     plot(time_fb,speed_ref)
+    grid on
     hold on
     plot(time_fb,y1_enc2_or_fb,':')
-    hold on
     plot(time_fb,y1_enc2_PIcomp_fb,'--')
     xlabel('t [s]')
     ylabel('\omega_2 [enc/s]')
@@ -282,6 +285,7 @@ if show_figures2 == 1
     figure('name', 'Comparison speed motor 1')
     subplot(2,2,1)
     plot(t, speed1_des,'--');
+    grid on
     hold on
     plot(t, speed1_act);
     hold off
@@ -292,6 +296,7 @@ if show_figures2 == 1
     title('speed comparison of motor 1')
     subplot(2,2,2)
     plot(t, speed1_des,'--');
+    grid on
     hold on
     plot(t, speed1_PIcomp_fb);
     hold off
@@ -302,16 +307,18 @@ if show_figures2 == 1
     title('speed comparison of motor 1')
     subplot(2,2,3)
     plot(t, speed1_act-speed1_des);
+    grid on
     hold on
     plot(t, speed1_PIcomp_fb-speed1_des,'--');
     hold off
     xlabel('t [s]')
-    ylabel('\Delta omega_1 [enc/s]')
+    ylabel('\Delta \omega_1 [enc/s]')
     axis([t_start t_stop -inf inf]);
     legend('error actual','error simulated')
     title('error between speed and desired speed')
     subplot(2,2,4)
     plot(t, control_signal1);
+    grid on
     xlabel('t [s]')
     ylabel('V_1 [mV]')
     axis([t_start t_stop -inf inf]);
@@ -323,6 +330,7 @@ if show_figures2 == 1
     figure('name', 'Comparison speed motor 2')
     subplot(2,2,1)
     plot(t, speed2_des,'--');
+    grid on
     hold on
     plot(t, speed2_act);
     hold off
@@ -333,6 +341,7 @@ if show_figures2 == 1
     title('speed comparison of motor 2')
     subplot(2,2,2)
     plot(t, speed2_des,'--');
+    grid on
     hold on
     plot(t, speed2_PIcomp_fb);
     hold off
@@ -343,6 +352,7 @@ if show_figures2 == 1
     title('speed comparison of motor 2')
     subplot(2,2,3)
     plot(t, speed2_act-speed2_des);
+    grid on
     hold on
     plot(t, speed2_PIcomp_fb-speed2_des,'--');
     hold off
@@ -353,6 +363,7 @@ if show_figures2 == 1
     title('error between speed and desired speed')
     subplot(2,2,4)
     plot(t, control_signal2);
+    grid on
     xlabel('t [s]')
     ylabel('V_2 [mV]')
     axis([t_start t_stop -inf inf]);
