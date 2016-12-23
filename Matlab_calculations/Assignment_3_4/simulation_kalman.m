@@ -1,5 +1,9 @@
 clear all; close all; clc;
 
+% For figures:
+set(0,'defaultlinelinewidth',2)
+set(0,'defaultaxesfontsize',12)
+
 % =========================================================================
 % Example simulation file for Kalman filtering on 2wd cart
 % December 2016 - Ruben Van Parys
@@ -138,6 +142,7 @@ hold off
 
 figure()
 plot(x(1,:), x(2,:));
+grid on;
 hold on
 plot(x_est(1,:), x_est(2,:));
 hold on
@@ -164,6 +169,7 @@ meas_valid = rec.getData('meas_valid');
 figure
 subplot(4,1,1)
 plot(x_ref)
+grid on;
 hold on
 plot(x_kalman)
 axis([-Inf Inf -0.3 0.3])
@@ -173,6 +179,7 @@ title('comparison position x')
 hold off
 subplot(4,1,2)
 plot(y_ref)
+grid on;
 hold on
 plot(y_kalman)
 axis([-Inf Inf -0.3 0.3])
@@ -182,6 +189,7 @@ title('comparison position y')
 hold off
 subplot(4,1,3)
 plot(theta_ref)
+grid on;
 hold on
 plot(theta_kalman)
 axis([-Inf Inf -6 1])
@@ -191,6 +199,7 @@ title('comparison angle \theta')
 hold off
 subplot(4,1,4)
 plot(meas_valid)
+grid on;
 xlabel('t [ms]')
 ylabel('meas valid [-]')
 title('measuremtens valid')
@@ -198,6 +207,7 @@ title('measuremtens valid')
 
 figure
 plot(x_ref, y_ref)
+grid on;
 hold on
 plot(x_kalman, y_kalman)
 hold off
@@ -226,6 +236,7 @@ meas_valid = rec.getData('meas_valid');
 figure
 subplot(4,1,1)
 plot(x_ref)
+grid on
 hold on
 plot(x_kalman)
 axis([-Inf Inf -0.3 0.3])
@@ -235,6 +246,7 @@ ylabel('x [m]')
 title('comparison position x')
 subplot(4,1,2)
 plot(y_ref)
+grid on
 hold on
 plot(y_kalman)
 axis([-Inf Inf -0.3 0.3])
@@ -244,6 +256,7 @@ ylabel('y [m]')
 title('comparison position y')
 subplot(4,1,3)
 plot(theta_ref)
+grid on
 hold on
 plot(theta_kalman)
 axis([-Inf Inf -6 1])
@@ -253,6 +266,7 @@ ylabel('\angle [rad]')
 title('comparison angle \theta')
 subplot(4,1,4)
 plot(meas_valid)
+grid on
 xlabel('t [ms]')
 ylabel('meas valid [-]')
 title('measurements valid')
@@ -260,6 +274,7 @@ title('measurements valid')
 
 figure
 plot(x_ref, y_ref)
+grid on
 hold on
 plot(x_kalman, y_kalman)
 hold off

@@ -4,6 +4,8 @@ if ~ exist('show_figures6', 'var')
     clc
     clear
     show_figures6 = 1;   % show_figures6 can be set to 0 in another file to suppress the figures in this code
+    set(0,'defaultlinelinewidth',2)
+	set(0,'defaultaxesfontsize',12)
 end
 
 %% Run assignment_3_1_3.m
@@ -37,9 +39,11 @@ D_fusion = [0];
 
 sys_fusion_d = ss(A_fusion,B_fusion,C_fusion,D_fusion,Ts);
 
-% Calculating the poles of the system
+% Calculating the poles and zeros of the system
  
-poles_fusion = eig(A_fusion)
+poles_fusion1 = eig(A_fusion);
+poles_fusion2 = pole(sys_fusion_d);
+zeros_fusion = zero(sys_fusion_d);
 
 if show_figures6 == 1
     figure('name','Root locus of discrete system position fusion')
@@ -122,6 +126,7 @@ if show_figures6 == 1
     figure('name','position fusion no disturbance')
     subplot(2,2,1)
     plot(t, relative_distance);
+    grid on
     xlabel('t [s]')
     ylabel('state x [m]')
     axis([t_start t_stop -inf inf]);
@@ -129,6 +134,7 @@ if show_figures6 == 1
     title('relative distance')
     subplot(2,2,2)
     plot(t, absolute_distance,'--');
+    grid on
     hold on
     plot(t, real_distance);
     hold off
@@ -139,6 +145,7 @@ if show_figures6 == 1
     title('distance comparison')
     subplot(2,2,3)
     plot(t, error_distance);
+    grid on
     xlabel('t [s]')
     ylabel('error [m]')
     axis([t_start t_stop -inf inf]);
@@ -146,6 +153,7 @@ if show_figures6 == 1
     title('error between real and absolute distance')
     subplot(2,2,4)
     plot(t, speed_cart);
+    grid on
     xlabel('t [s]')
     ylabel('v_{cart} [m/s]')
     axis([t_start t_stop -inf inf]);
@@ -194,6 +202,7 @@ if show_figures6 == 1
     figure('name','position fusion with disturbance')
     subplot(2,2,1)
     plot(t, relative_distance);
+    grid on
     xlabel('t [s]')
     ylabel('state x [m]')
     axis([t_start t_stop -inf inf]);
@@ -201,6 +210,7 @@ if show_figures6 == 1
     title('relative distance')
     subplot(2,2,2)
     plot(t, absolute_distance,'--');
+    grid on
     hold on
     plot(t, real_distance);
     hold off
@@ -211,6 +221,7 @@ if show_figures6 == 1
     title('distance comparison')
     subplot(2,2,3)
     plot(t, error_distance);
+    grid on
     xlabel('t [s]')
     ylabel('error [m]')
     axis([t_start t_stop -inf inf]);
@@ -218,6 +229,7 @@ if show_figures6 == 1
     title('error between real and absolute distance')
     subplot(2,2,4)
     plot(t, speed_cart);
+    grid on
     xlabel('t [s]')
     ylabel('v_{cart} [m/s]')
     axis([t_start t_stop -inf inf]);
