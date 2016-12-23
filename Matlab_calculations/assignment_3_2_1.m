@@ -12,6 +12,8 @@ show_figures2 = 0;  % assignment_3_1_2 doesn't display its figures, if set to ze
 show_figures3 = 0;  % assignment_3_1_3 doesn't display its figures, if set to zero, so works a bit faster
 assignment_3_1_3
 
+set(0,'defaultlinelinewidth',2)
+set(0,'defaultaxesfontsize',12)
 
 %% Calculating open loop
 close all
@@ -32,6 +34,7 @@ sys_pos2_open_d = c2d(sys_pos2_open_c, Ts);
 if show_figures4 == 1
     figure('name', 'open loop bode diagram position 1')
     bode(sys_pos1_open_c)
+    grid on
     hold on
     bode(sys_pos1_open_d)
     hold off
@@ -39,6 +42,7 @@ if show_figures4 == 1
     
     figure('name', 'open loop bode diagram position 2')
     bode(sys_pos2_open_c)
+    grid on
     hold on
     bode(sys_pos2_open_d)
     hold off
