@@ -27,21 +27,21 @@ n_u = 2;
 % number of measurements
 n_y = 2;
 % covariance of simulated process noise
-Q_sim = 5e-7*eye(n_x);
+Q_sim = 3e-11*eye(n_x);
 % covariance of simulated measurement noise
-R_sim = 5e-4*eye(n_y);
+R_sim = 8e-10*eye(n_y);
 % covariance of modeled process noise
-Q_mod = 5e-7*eye(n_x);
+Q_mod = 3e-11*eye(n_x);
 % covariance of simulated measurement noise
-R_mod = 5e-4*eye(n_y);
+R_mod = 8e-10*eye(n_y);
 % initial state
 x0 = zeros(n_x,1);
 % initial state estimate
 x_est0 = zeros(n_x,1);
 % feedback values
-kx = 0.2*2;
-ky = 0.2*20;
-kt = 0.2*20;
+kx = 100*.5;
+ky = 5000*.5;
+kt = 10*12;
 % trajectory file
 filename = 'TrajectoryKalmanExercise.txt';
 
@@ -55,6 +55,7 @@ data = dlmread(filename, '\t', 1, 0);
 t = data(:,1)';
 x_ref = data(:,2:4)';  % x [m], y [m], theta [rad]
 u_ref = data(:,5:6)';  % v [m/s], omega [rad/s]
+meas_valid = data(:,10)';
 Ts = t(2) - t(1);
 % create signals
 x = zeros(n_x, length(t));
@@ -63,7 +64,7 @@ y = zeros(n_y, length(t));
 e = zeros(n_x, length(t));
 x_est = zeros(n_x, length(t));
 P_est = zeros(n_x, n_x, length(t));
-P_est(:,:,1) = [1e-4 0.5e-4 0 ; 0.5e-4 1e-4 0 ; 0 0 1e-4];
+P_est(:,:,1) = [10e-10 5e-10 0 ; 5e-10 10e-10 0 ; 0 0 1e-4];
 nu = zeros(n_y, length(t));
 S = zeros(n_y, n_y, length(t));
 L = zeros(n_x, n_y, length(t));
@@ -95,7 +96,7 @@ end
 
 wall_params = [a1, b1, c1 ; a2, b2, c2];
 
-figure()
+figure('name', 'confidence ellipsoids simulation')
 hold on
 daspect([1 1 1])
 cont = drawellipsoid(P_est(1:2,1:2,1));
@@ -120,27 +121,34 @@ for i = 2:length(t)
     P_est(:,:,i) = A*P_est(:,:,i-1)*A' + Q_mod;
         
         
-    if dead_reckoning ~= 1
+    if (dead_reckoning ~= 1 && meas_valid(i) == 1)
         % Kalman correction step
         nu(:,i) = y(:,i) - h(wall_params, x_est(:,i));
         S(:,:,i) = C*P_est(:,:,i)*C' + R_mod;
         L(:,:,i) = P_est(:,:,i)*C'/S(:,:,i);
         x_est(:,i) = x_est(:,i) + L(:,:,i)*nu(:,i);
         P_est(:,:,i) = (eye(n_x)-L(:,:,i)*C)*P_est(:,:,i);
+        
+        cont = drawellipsoid(P_est(1:2,1:2,i));
+        plot(cont(:,1), cont(:,2))
+    end
+    if dead_reckoning == 1
+        cont = drawellipsoid(P_est(1:2,1:2,i));
+        plot(cont(:,1), cont(:,2))
     end
 
     % Control law
     if state_feedback == 1
         e(:,i) = local_error(x_ref(:,i), x_est(:,i));
         u(:,i) = u_ref(:,i) + K*e(:,i);
-    end
-    
-    cont = drawellipsoid(P_est(1:2,1:2,i));
-    plot(cont(:,1), cont(:,2))
+    end    
+
 end
+xlabel('e_x')
+ylabel('e_y')
 hold off
 
-figure()
+figure('name', 'simulated trajectory with kalman filter')
 plot(x(1,:), x(2,:));
 grid on;
 hold on
@@ -149,6 +157,24 @@ hold on
 plot(x_ref(1,:), x_ref(2,:));
 hold off
 legend('actual', 'estimated', 'reference')
+
+figure('name', 'errors in tracking the simulated trajectory')
+subplot(4,1,1)
+plot(x_ref(1,:) - x_est(1,:))
+ylabel('x_{ref} - x_{est} [m]')
+grid on
+subplot(4,1,2)
+plot(x_ref(2,:) - x_est(2,:))
+ylabel('y_{ref} - y_{est} [m]')
+grid on
+subplot(4,1,3)
+plot(x_ref(3,:) - x_est(3,:))
+ylabel('\theta_{ref} - \theta_{est} [rad]')
+grid on
+subplot(4,1,4)
+plot(meas_valid(:))
+ylabel({'measurement','valid'})
+grid on
 
 
 % ============================== Experiment 1 ===============================
@@ -166,7 +192,7 @@ y_kalman = rec.getData('y_kalman');
 theta_kalman = rec.getData('theta_kalman');
 meas_valid = rec.getData('meas_valid');
 
-figure
+figure('name', 'comparison states experiment 1')
 subplot(4,1,1)
 plot(x_ref)
 grid on;
@@ -205,7 +231,7 @@ ylabel('meas valid [-]')
 title('measuremtens valid')
 %axis([-Inf Inf -Inf Inf])
 
-figure
+figure('name', 'trajectory experiment 1')
 plot(x_ref, y_ref)
 grid on;
 hold on
@@ -233,7 +259,7 @@ y_kalman = rec.getData('y_kalman');
 theta_kalman = rec.getData('theta_kalman');
 meas_valid = rec.getData('meas_valid');
 
-figure
+figure('name', 'comparison states experiment 2')
 subplot(4,1,1)
 plot(x_ref)
 grid on
@@ -272,7 +298,25 @@ ylabel('meas valid [-]')
 title('measurements valid')
 %axis([-Inf Inf -Inf Inf])
 
-figure
+figure('name', 'errors in tracking the trajectory in experiment 2')
+subplot(4,1,1)
+plot(x_ref - x_kalman)
+ylabel('x_{ref} - x_{est} [m]')
+grid on
+subplot(4,1,2)
+plot(y_ref - y_kalman)
+ylabel('y_{ref} - y_{est} [m]')
+grid on
+subplot(4,1,3)
+plot(theta_ref - theta_kalman)
+ylabel('\theta_{ref} - \theta_{est} [rad]')
+grid on
+subplot(4,1,4)
+plot(meas_valid)
+ylabel({'measurement','valid'})
+grid on
+
+figure('name', 'trajectory experiment 2')
 plot(x_ref, y_ref)
 grid on
 hold on
