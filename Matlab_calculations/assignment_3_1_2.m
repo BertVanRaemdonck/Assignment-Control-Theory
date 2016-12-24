@@ -92,7 +92,7 @@ if show_figures2 == 1
     bode(sys_PI1, w), grid
     title('Bode diagram PI for encoder 1')
     subplot(2,1,2)
-    bode(sys_PI1, w), grid
+    bode(sys_PI2, w), grid
     title('Bode diagram PI for encoder 2')
 end
 

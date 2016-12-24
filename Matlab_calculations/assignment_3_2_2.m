@@ -56,6 +56,9 @@ sys_P_pos2 = tf([K],[1]);
 sys_pos1_open_Pcomp_c = series(sys_P_pos1, sys_pos1_open_c);
 sys_pos2_open_Pcomp_c = series(sys_P_pos2, sys_pos2_open_c);
 
+sys_pos1_open_Pcomp_d = c2d(sys_pos1_open_Pcomp_c, Ts);
+sys_pos2_open_Pcomp_d = c2d(sys_pos2_open_Pcomp_c, Ts);
+
 sys_pos1_close_Pcomp_c = feedback(sys_pos1_open_Pcomp_c,1);
 sys_pos2_close_Pcomp_c = feedback(sys_pos2_open_Pcomp_c,1);
 
@@ -63,20 +66,20 @@ sys_pos1_close_Pcomp_d = c2d(sys_pos1_close_Pcomp_c, Ts);
 sys_pos2_close_Pcomp_d = c2d(sys_pos2_close_Pcomp_c, Ts);
 
 if show_figures5 == 1
-    figure('name','closed loop bode diagram with proportional controller encoder 1')
-    bode(sys_pos1_close_Pcomp_c)
+    figure('name','open loop bode diagram with proportional controller encoder 1')
+    bode(sys_pos1_open_Pcomp_c)
     grid on
     hold on
-    bode(sys_pos1_close_Pcomp_d)
+    bode(sys_pos1_open_Pcomp_d)
     hold off
     legend('cont', 'disc')
     set(findall(gcf,'Type','line'),'LineWidth',2)
     
-    figure('name','closed loop bode diagram with proportional controller encoder 2')
-    bode(sys_pos2_close_Pcomp_c)
+    figure('name','open loop bode diagram with proportional controller encoder 2')
+    bode(sys_pos2_open_Pcomp_c)
     grid on
     hold on
-    bode(sys_pos2_close_Pcomp_d)
+    bode(sys_pos2_open_Pcomp_d)
     hold off
     legend('cont', 'disc')
     set(findall(gcf,'Type','line'),'LineWidth',2)
@@ -139,24 +142,27 @@ sys_pos1_close_PIcomp_c = feedback(sys_pos1_open_PIcomp_c,1);
 sys_pos2_open_PIcomp_c = series(sys_PI_pos2, sys_pos2_open_c);
 sys_pos2_close_PIcomp_c = feedback(sys_pos2_open_PIcomp_c,1);
 
+sys_pos1_open_PIcomp_d = c2d(sys_pos1_open_PIcomp_c, Ts);
+sys_pos2_open_PIcomp_d = c2d(sys_pos2_open_PIcomp_c, Ts);
+
 sys_pos1_close_PIcomp_d = c2d(sys_pos1_close_PIcomp_c, Ts);
 sys_pos2_close_PIcomp_d = c2d(sys_pos2_close_PIcomp_c, Ts);
 
 if show_figures5 == 1
     figure('name','closed loop bode diagram with PI controller encoder 1')
-    bode(sys_pos1_close_PIcomp_c)
+    bode(sys_pos1_open_PIcomp_c)
     grid on
     hold on
-    bode(sys_pos1_close_PIcomp_d)
+    bode(sys_pos1_open_PIcomp_d)
     hold off
     legend('cont', 'disc')
     set(findall(gcf,'Type','line'),'LineWidth',2)
     
     figure('name','closed loop bode diagram with PI controller encoder 2')
-    bode(sys_pos2_close_PIcomp_c)
+    bode(sys_pos2_open_PIcomp_c)
     grid on
     hold on
-    bode(sys_pos2_close_PIcomp_d)
+    bode(sys_pos2_open_PIcomp_d)
     hold off
     legend('cont', 'disc')
     set(findall(gcf,'Type','line'),'LineWidth',2)
